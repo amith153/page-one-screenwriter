@@ -24,7 +24,10 @@ export function SyncRows() {
 
   if (!isValid(currentServer())) {
     return <><label>Phone sync<span className="desc">Projects, daily words and streak on every device.</span></label>
-      <div className="faint">This build has no live-sync server, so sync is off. Build it with the server keys from your phone project (see .env.example).</div></>
+      <div style={{ display: 'grid', gap: 6 }}>
+        <b>Sync is switched off in this download.</b>
+        <span className="faint">Syncing needs a small server that you set up yourself (a free Firebase project), and this download doesn't include one. Everything else works without it, and your scripts stay on this computer. To turn sync on, build the app with your own server details; the steps are in the README on GitHub.</span>
+      </div></>
   }
 
   const run = async (f: () => Promise<void>) => {
