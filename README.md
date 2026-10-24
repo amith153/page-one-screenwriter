@@ -16,7 +16,7 @@ This guide covers how to use every part of it. Developer notes are at the end.
 
 Windows may show "Windows protected your PC" because the installer is not code-signed yet: choose **More info, then Run anyway**. Android may warn the same way: choose **Install anyway**.
 
-The downloads contain **no server keys**, so they write, plan, export and print fully. Live co-writing, phone sync, Google Drive and daily film stills are off. To switch them on, build the app yourself with your own keys (see For developers and `.env.example`). Your scripts never leave your device unless you turn those features on.
+The downloads contain **no server keys**. Writing, planning, exporting, printing and **Wi-Fi sync with the phone app** all work. Live co-writing with other people, Google Drive and daily film stills need keys of your own: build the app yourself (see For developers and `.env.example`). Your scripts never leave your devices.
 
 **License:** MIT, © 2026 Amith ([@amith153](https://github.com/amith153)). See `LICENSE` and `THIRD_PARTY_NOTICES.md`.
 
@@ -46,13 +46,15 @@ The downloads contain **no server keys**, so they write, plan, export and print 
 
 ## Sync with the phone app
 
-Settings › Sync links this computer to the Page One Android app through the same live-sync server. One device shows an 8-letter code, the other types it (on the phone: Settings › Sync, or the Join box). After that, both devices share:
+Settings › Sync pairs this computer with the Page One Android app (or another computer or phone) **over your own Wi-Fi**. There is no server, no account and no keys: the devices talk directly to each other. It works in the downloads on the Releases page.
 
-- **Projects**: new, edited and deleted scripts follow you. An open project is live between the two devices; the others are brought up to date in the background, newest copy winning. Structure examples (Story › Structure) are study aids and never sync.
-- **Writing stats**: words per day (summed over devices), streak, writing year, sprints, daily goal.
-- **Name, daily goal and accent.**
+1. On one device choose **Show a code**. It shows an 8-letter code and its address (like `192.168.1.5`).
+2. On the other device type the address and the code under **Use a code**.
+3. Done. Whenever both apps are open on the same network (a phone's hotspot works too) they trade what changed, about every 15 seconds and a moment after you save.
 
-Needs no Firestore rules beyond the live co-writing ones (`scripts/**`). The wire format is described at the top of `src/collab/sync.ts`.
+What follows you: projects (new, edited and deleted), daily words, streak and writing year, sprints, daily goal, name and accent. Newest copy wins; a copy that would be replaced while holding changes the other side never saw is first kept under Versions as "Before Wi-Fi sync". A project that is open on a device is left alone until you close it. Pictures and voice notes stay on the device they were added on. The first time, Windows may ask to let Page One use private networks: choose Allow.
+
+Traffic stays on your local network and is not encrypted, so use it on a network you trust. Live co-writing with other people (join codes) is a separate feature that needs a Firebase server of your own; see `.env.example`.
 
 ## 1. Getting started
 

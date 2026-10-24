@@ -381,7 +381,6 @@ export function JoinModal() {
     try {
       const id = await join(text)
       close()
-      if (!id) { toast('Linked — your projects and writing stats now follow you between devices', 'cloud'); return }
       await useApp.getState().refresh()
       await useApp.getState().openScript(id)
       toast('Joined — you\'re writing together', 'users')

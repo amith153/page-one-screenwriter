@@ -1,6 +1,6 @@
 [package]
 name = "page-one"
-version = "0.1.1"
+version = "0.2.0"
 description = "Page One — screenwriting"
 authors = ["Amith (amith153)"]
 license = "MIT"

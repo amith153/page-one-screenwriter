@@ -10,8 +10,6 @@ import { el, newId, newScript, titlePage, type Script, type ScriptExtras } from 
 import { codeFor, colorFor, currentServer, findCode, isValid, resolve, type ServerConfig } from '../collab/hub'
 import { LiveSession, type Change, type LiveStatus, type Peer } from '../collab/live'
 import { keepCasing, mergeRemote, sameEls, sharedExtras } from '../collab/extras'
-import { SPACE_PREFIX } from '../collab/sync'
-import { syncActive, useSync } from './sync'
 import { useDoc } from './doc'
 import { EXAMPLE_DRAFT, loadScript, saveScript } from './library'
 import { useSettings } from './settings'
@@ -112,8 +110,7 @@ export const useCollab = create<CollabState>((set, get) => ({
   live: readLive(), status: null, peers: [], changes: [], uid: null, scriptId: null,
 
   configured: () => isValid(currentServer()),
-  // With sync on, every project is live between your own devices.
-  isLive: id => get().live.includes(id) || syncActive(),
+  isLive: id => get().live.includes(id),
 
   goLive: () => {
     const s = useDoc.getState().script
@@ -148,8 +145,6 @@ export const useCollab = create<CollabState>((set, get) => ({
     if (!isValid(server)) throw new Error('Set up the live-sync server first (Settings › Co-writing).')
     const inv = await resolve(server, code)
     if (!inv) throw new Error('That code has expired or was never made. Ask for a new one.')
-    // A code made under Settings › Sync pairs this computer with a phone instead of opening one script.
-    if (inv.scriptId.startsWith(SPACE_PREFIX)) { await useSync.getState().adopt(inv.scriptId); return '' }
     let exists = true
     try { await loadScript(inv.scriptId) } catch { exists = false }
     if (!exists) {

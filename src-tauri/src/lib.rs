@@ -1,6 +1,8 @@
 //! Page One desktop shell. The app itself is the web UI in `../src`; this side only does
 //! what a webview can't: files on disk (atomic saves, the library folder) and native dialogs.
 
+mod lan;
+
 use serde::Serialize;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -239,7 +241,12 @@ pub fn run() {
             open_path,
             open_web,
             oauth_loopback,
-            oauth_cancel
+            oauth_cancel,
+            lan::lan_serve,
+            lan::lan_stop,
+            lan::lan_respond,
+            lan::lan_fetch,
+            lan::lan_ips
         ])
         .run(tauri::generate_context!())
         .expect("error while building tauri application");
