@@ -43,3 +43,6 @@ service-account*.json
 .claude/
 src-tauri/target/
 *.pageone
+
+# Local backups
+*.tar.gz
