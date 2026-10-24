@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { create } from 'zustand'
 import { todayIso } from '../core/production'
 import { useDoc } from '../state/doc'
-import { useSettings } from '../state/settings'
+import { useSettings, wordsOn } from '../state/settings'
 import { Icon } from './Icon'
 
 export type Ambience = 'off' | 'rain' | 'brown'
@@ -109,7 +109,7 @@ export function FocusHud() {
   const currentId = useDoc(d => d.currentId)
   const script = useDoc(d => d.script)
   const goal = useSettings(s => s.s.dailyGoal)
-  const today = useSettings(s => s.log.days[todayIso()] ?? 0)
+  const today = useSettings(s => wordsOn(s.log, todayIso()))
   const focusLine = useSettings(s => s.s.focusLine)
   const [shown, setShown] = useState(true)
   const [, tick] = useState(0)

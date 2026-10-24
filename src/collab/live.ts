@@ -271,7 +271,7 @@ export class LiveSession {
 const sameElement = (a: Element, b: Element) =>
   a.type === b.type && a.text === b.text && a.dual === b.dual && a.revision === b.revision && a.color === b.color && a.synopsis === b.synopsis
 
-function parseElement(d: DocumentSnapshot): Element | null {
+export function parseElement(d: DocumentSnapshot): Element | null {
   const id = Number(d.id)
   if (!Number.isFinite(id)) return null
   return el(id, typeFromName(d.get('t')), d.get('x') ?? '', {

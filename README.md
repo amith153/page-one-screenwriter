@@ -30,6 +30,16 @@ This guide covers how to use every part of it. Developer notes are at the end.
 
 ---
 
+## Sync with the phone app
+
+Settings › Sync links this computer to the Page One Android app through the same live-sync server. One device shows an 8-letter code, the other types it (on the phone: Settings › Sync, or the Join box). After that, both devices share:
+
+- **Projects**: new, edited and deleted scripts follow you. An open project is live between the two devices; the others are brought up to date in the background, newest copy winning. Structure examples (Story › Structure) are study aids and never sync.
+- **Writing stats**: words per day (summed over devices), streak, writing year, sprints, daily goal.
+- **Name, daily goal and accent.**
+
+Needs no Firestore rules beyond the live co-writing ones (`scripts/**`). The wire format is described at the top of `src/collab/sync.ts`.
+
 ## 1. Getting started
 
 **First launch.** A short welcome tour asks your name (it goes on title pages and notes) and a daily word goal. You can open the sample screenplay, *The Last Projectionist*, to look around before you start your own.

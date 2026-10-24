@@ -15,6 +15,7 @@ import { useApp } from './appState'
 import { printNow } from './menus'
 import { JoinModal, ShareModal } from './Collab'
 import { DriveModal } from './Drive'
+import { SyncRows } from './SyncRows'
 
 export function ModalHost() {
   const id = useModal(m => m.id)
@@ -100,6 +101,8 @@ function SettingsModal() {
         </Row>}
         <div className="settings-section">Home</div>
         <Row label="A film still every day" desc="Behind the day's line on the home screen."><Switch on={s.dailyStill} onChange={v => set({ dailyStill: v })} /></Row>
+        <div className="settings-section">Sync</div>
+        <SyncRows />
         <div className="settings-section">Files</div>
         <Row label="Library folder" desc="Same layout as the phone. Copy scripts in, or keep it in a synced folder.">
           <code className="faint ellipsis" style={{ maxWidth: 360, fontSize: 11.5 }}>{root}</code>

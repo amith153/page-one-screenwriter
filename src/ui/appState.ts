@@ -1,6 +1,7 @@
 /** Where the app is (library or a script) and the library listing. */
 import { create } from 'zustand'
-import { listLibrary, type ScriptMeta } from '../state/library'
+import { deleteScript, listLibrary, type ScriptMeta } from '../state/library'
+import { isExampleScript } from '../data/structureExamples'
 import { useDoc } from '../state/doc'
 import { toast } from './kit'
 
@@ -17,6 +18,15 @@ interface AppState {
   setAbout: (v: boolean) => void
 }
 
+/** Close the open script; a structure example is a study aid, so it goes with it. */
+async function leave() {
+  const cur = useDoc.getState().script
+  if (!cur) return
+  const example = isExampleScript(cur.titlePage.draft)
+  await useDoc.getState().close()
+  if (example) { try { await deleteScript(cur.id) } catch { /* swept up on the next listing */ } }
+}
+
 export const useApp = create<AppState>((set, get) => ({
   library: [],
   loaded: false,
@@ -24,11 +34,11 @@ export const useApp = create<AppState>((set, get) => ({
   query: '',
   setQuery: q => set({ query: q }),
   refresh: async () => {
-    try { set({ library: await listLibrary(), loaded: true }) } catch (e) { console.error(e); set({ loaded: true }) }
+    try { set({ library: await listLibrary(useDoc.getState().script?.id), loaded: true }) } catch (e) { console.error(e); set({ loaded: true }) }
   },
   openScript: async id => {
     try {
-      if (useDoc.getState().script) await useDoc.getState().close()
+      await leave()
       await useDoc.getState().open(id)
     } catch (e) {
       console.error(e)
@@ -37,7 +47,7 @@ export const useApp = create<AppState>((set, get) => ({
   },
   goHome: async () => {
     if (!useDoc.getState().script) return
-    await useDoc.getState().close()
+    await leave()
     await get().refresh()
   },
   setAbout: v => set({ about: v }),

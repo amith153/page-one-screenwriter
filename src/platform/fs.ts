@@ -73,6 +73,12 @@ export async function openPath(path: string): Promise<void> {
   if (isTauri) await invoke('open_path', { path })
 }
 
+/** Open a web page in the system browser (never through the file manager, which would show a folder instead). */
+export async function openWeb(url: string): Promise<void> {
+  if (isTauri) await invoke('open_web', { url })
+  else window.open(url, '_blank', 'noopener')
+}
+
 // ---------------------------------------------------------------- dialogs
 
 export interface Filter { name: string; extensions: string[] }

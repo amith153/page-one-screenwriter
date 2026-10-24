@@ -8,10 +8,15 @@ import { decodeScript, encodeScript, scriptFromJson } from '../core/codec'
 import { dataRoot, join, listDir, readText, remove, writeText } from '../platform/fs'
 import { useSettings } from './settings'
 
+/** The draft label that marks a structure example on its title page. */
+export const EXAMPLE_DRAFT = 'Structure example'
+
 export interface ScriptMeta {
   id: string; title: string; author: string; modifiedAt: number; createdAt: number
   pages: number; scenes: number; words: number; coverColor: number; logline: string
   deadline: Deadline | null; locked: boolean
+  /** A worked structure example (Story › Structure): a study aid, never listed as a project and never synced. */
+  example: boolean
 }
 
 export interface VersionInfo { path: string; name: string; time: number; pages: number }
@@ -22,6 +27,9 @@ async function paths() {
   return { scripts: join(root, 'scripts'), versions: join(root, 'versions'), index: join(root, 'scripts', '_index.json'), root }
 }
 export const libraryRoot = async () => (await paths()).root
+
+/** Sync listens here: a project was saved. */
+export const libraryHooks: { saved?: (m: ScriptMeta) => void } = {}
 
 export function metaOf(s: Script, pages: number): ScriptMeta {
   let words = 0, scenes = 0
@@ -34,6 +42,7 @@ export function metaOf(s: Script, pages: number): ScriptMeta {
   return {
     id: s.id, title: s.title, author: authorOf(s.titlePage), modifiedAt: s.modifiedAt, createdAt: s.createdAt, pages, scenes, words,
     coverColor: s.coverColor, logline: logline.substring(0, 140), deadline: s.extras.deadline, locked: s.extras.lock.locked,
+    example: s.titlePage.draft === EXAMPLE_DRAFT,
   }
 }
 
@@ -45,7 +54,7 @@ async function readIndex(): Promise<Map<string, ScriptMeta>> {
       const m: ScriptMeta = {
         id: String(o.id), title: String(o.title ?? ''), author: String(o.author ?? ''), modifiedAt: Number(o.modifiedAt ?? 0),
         createdAt: Number(o.createdAt ?? 0), pages: Number(o.pages ?? 0), scenes: Number(o.scenes ?? 0), words: Number(o.words ?? 0),
-        coverColor: Number(o.coverColor ?? 0), logline: String(o.logline ?? ''), locked: Boolean(o.locked),
+        coverColor: Number(o.coverColor ?? 0), logline: String(o.logline ?? ''), locked: Boolean(o.locked), example: Boolean(o.example),
         deadline: dl ? { date: String(dl.date ?? ''), targetPages: Number(dl.pages ?? 110), startDate: String(dl.start ?? ''), startPages: Number(dl.startPages ?? 0), label: String(dl.label ?? 'First draft') } : null,
       }
       return [m.id, m]
@@ -59,14 +68,19 @@ async function writeIndex(list: ScriptMeta[]) {
       id: m.id, title: m.title, author: m.author, modifiedAt: m.modifiedAt, createdAt: m.createdAt, pages: m.pages,
       scenes: m.scenes, words: m.words, coverColor: m.coverColor, logline: m.logline, locked: m.locked,
     }
+    if (m.example) o.example = true
     if (m.deadline) o.deadline = { date: m.deadline.date, pages: m.deadline.targetPages, start: m.deadline.startDate, startPages: m.deadline.startPages, label: m.deadline.label }
     return o
   })
   try { await writeText((await paths()).index, JSON.stringify(arr)) } catch { /* the index is only a cache */ }
 }
 
-/** Every script in the library, newest first. Scripts copied in from the phone are picked up here. */
-export async function listLibrary(): Promise<ScriptMeta[]> {
+/**
+ * Every project in the library, newest first. Scripts copied in from the phone are picked up here.
+ * Structure examples are study aids, not projects: they are left out, and any left behind (apart from
+ * the one open in the editor) are deleted.
+ */
+export async function listLibrary(openId?: string | null): Promise<ScriptMeta[]> {
   const p = await paths()
   const index = await readIndex()
   const files = (await listDir(p.scripts)).filter(f => !f.is_dir && f.name.endsWith('.json') && f.name !== '_index.json')
@@ -77,8 +91,11 @@ export async function listLibrary(): Promise<ScriptMeta[]> {
     if (cached && (f.modified === 0 || cached.modifiedAt >= f.modified - 2000 || !isFinite(f.modified))) { metas.push(cached); continue }
     try { metas.push(metaOf(scriptFromJson(await readText(f.path)), cached?.pages ?? 0)) } catch { /* skip unreadable files */ }
   }
-  await writeIndex(metas)
-  return metas.sort((a, b) => b.modifiedAt - a.modifiedAt)
+  const stale = metas.filter(m => m.example && m.id !== openId)
+  for (const m of stale) { try { await remove(join(p.scripts, `${m.id}.json`)); await remove(join(p.versions, m.id)) } catch { /* try again next time */ } }
+  const projects = metas.filter(m => !m.example)
+  await writeIndex(metas.filter(m => !stale.includes(m)))
+  return projects.sort((a, b) => b.modifiedAt - a.modifiedAt)
 }
 
 export async function loadScript(id: string): Promise<Script> {
@@ -92,6 +109,7 @@ export async function saveScript(s: Script, pages: number): Promise<ScriptMeta> 
   const index = await readIndex()
   index.set(s.id, meta)
   await writeIndex([...index.values()])
+  if (!meta.example) libraryHooks.saved?.(meta)
   return meta
 }
 

@@ -117,6 +117,16 @@ fn open_path(path: String) -> Result<(), String> {
     r.map(|_| ()).map_err(err)
 }
 
+/// Open a web page in the default browser. Only http(s) links are ever handed to the system.
+#[tauri::command]
+fn open_web(url: String) -> Result<(), String> {
+    let lower = url.to_ascii_lowercase();
+    if !(lower.starts_with("https://") || lower.starts_with("http://")) {
+        return Err("Only web links can be opened".into());
+    }
+    open_url(&url).map_err(err)
+}
+
 fn open_url(url: &str) -> std::io::Result<()> {
     #[cfg(target_os = "windows")]
     let r = std::process::Command::new("rundll32").args(["url.dll,FileProtocolHandler", url]).spawn();
@@ -227,6 +237,7 @@ pub fn run() {
             write_bytes,
             remove_path,
             open_path,
+            open_web,
             oauth_loopback,
             oauth_cancel
         ])

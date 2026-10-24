@@ -8,7 +8,8 @@ import { MANUAL } from '../data/manual'
 import { el, newId, SCENE_COLORS } from '../core/model'
 import { createScript, deleteScript, duplicateScript, loadScript, type ScriptMeta } from '../state/library'
 import { openLink } from '../state/media'
-import { lastDays, streak, useSettings } from '../state/settings'
+import { syncUserDeleted } from '../state/sync'
+import { allDays, lastDays, streak, useSettings, wordsOn } from '../state/settings'
 import { importFile, exportPageOne } from '../io/files'
 import { Icon } from './Icon'
 import { confirmAction, openMenu, toast, useModal } from './kit'
@@ -84,11 +85,12 @@ export function Home() {
   const [sort, setSort] = useState<Sort>('recent')
   const [spark, setSpark] = useState(sparkLine)
 
-  const today = log.days[todayIso()] ?? 0
+  const merged = useMemo(() => allDays(log), [log])
+  const today = wordsOn(log, todayIso())
   const pct = s.dailyGoal ? Math.min(1, today / s.dailyGoal) : 0
-  const week = lastDays(log.days, 7)
-  const year = useMemo(() => lastDays(log.days, 7 * 52), [log.days])
-  const days = streak(log.days)
+  const week = lastDays(merged, 7)
+  const year = useMemo(() => lastDays(merged, 7 * 52), [merged])
+  const days = streak(merged)
   const g = greeting(s.name)
   const deadlines = library.filter(m => m.deadline)
   const recent = useMemo(() => {
@@ -411,6 +413,6 @@ function menu(m: ScriptMeta, at: HTMLElement | { x: number; y: number }, refresh
     { label: 'Duplicate', icon: 'copy', run: async () => { await duplicateScript(m.id); await refresh() } },
     { label: 'Export .pageone', icon: 'export', run: async () => exportPageOne(await loadScript(m.id)) },
     { divider: true },
-    { label: 'Delete', icon: 'trash', danger: true, run: () => confirmAction(`Delete “${m.title}” and all its versions? This can't be undone.`, 'Delete', async () => { await deleteScript(m.id); await refresh() }) },
+    { label: 'Delete', icon: 'trash', danger: true, run: () => confirmAction(`Delete “${m.title}” and all its versions? This can't be undone.`, 'Delete', async () => { await deleteScript(m.id); syncUserDeleted(m.id); await refresh() }) },
   ], at, 'right')
 }

@@ -170,10 +170,9 @@ function ExampleBar({ id, x, outline }: { id: string; x: StructureExample; outli
     setBusy(true)
     try {
       const sid = await createExample(id)
-      await useApp.getState().refresh()
       await useApp.getState().openScript(sid)
       useDoc.getState().setView('story')
-      toast(`Example opened — every beat of ${x.film} is a scene. It's in your library; delete it whenever you like.`, 'film')
+      toast(`Example opened — every beat of ${x.film} is a scene. It goes away when you close it; your projects aren't touched.`, 'film')
     } catch (e) { toast((e as Error).message, 'close') } finally { setBusy(false) }
   }
   return (

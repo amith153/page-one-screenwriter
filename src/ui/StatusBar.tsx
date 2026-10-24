@@ -4,7 +4,7 @@ import { todayIso } from '../core/production'
 import { getEditorView, onEditorChange, runCommand } from '../editor/bridge'
 import { here, setType } from '../editor/commands'
 import { useDoc } from '../state/doc'
-import { useSettings } from '../state/settings'
+import { useSettings, wordsOn } from '../state/settings'
 import { Icon } from './Icon'
 import { openMenu } from './kit'
 
@@ -22,7 +22,7 @@ export function StatusBar() {
   const session = useDoc(d => d.sessionWords)
   const s = useSettings(x => x.s)
   const set = useSettings(x => x.set)
-  const today = useSettings(x => x.log.days[todayIso()] ?? 0)
+  const today = useSettings(x => wordsOn(x.log, todayIso()))
   const h = useCurrentType()
   if (!script) return null
   const page = h && p ? p.elementPage[h.index] ?? 0 : 0

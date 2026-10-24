@@ -6,7 +6,7 @@
  */
 import { el, newId, titlePage, type Element, type ScriptExtras } from '../core/model'
 import { createStructure, template } from '../core/structures'
-import { createScript, saveScript } from '../state/library'
+import { createScript, EXAMPLE_DRAFT, saveScript } from '../state/library'
 import { paginate } from '../state/doc'
 
 export interface StructureExample {
@@ -243,8 +243,8 @@ export const EXAMPLES: Record<string, StructureExample> = {
 
 export const exampleFor = (templateId: string) => EXAMPLES[templateId]
 
-/** Example scripts are marked on their title page; their beats are read against the film, not the outline's own pages. */
-export const EXAMPLE_DRAFT = 'Structure example'
+/** Example scripts are marked on their title page (and kept out of the project list); their beats are read against the film, not the outline's own pages. */
+export { EXAMPLE_DRAFT }
 export const isExampleScript = (draft: string) => draft === EXAMPLE_DRAFT
 
 /** Where to read the screenplay: the known free copy, or a search for one. */

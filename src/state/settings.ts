@@ -61,10 +61,26 @@ const DEFAULTS: Settings = {
 export interface Sprint { at: number; minutes: number; words: number; goal: number; script: string }
 
 export interface WritingLog {
-  /** yyyy-MM-dd → words written that day (net words added while typing). */
+  /** yyyy-MM-dd → words written that day on this computer (net words added while typing). */
   days: Record<string, number>
+  /** yyyy-MM-dd → words written that day on your other devices (phone), when they're synced. */
+  others?: Record<string, number>
   sprints: Sprint[]
 }
+
+/** Words on one day, from every synced device. */
+export const wordsOn = (log: WritingLog, day: string) => (log.days[day] ?? 0) + (log.others?.[day] ?? 0)
+
+/** Every day's words, from every synced device. */
+export function allDays(log: WritingLog): Record<string, number> {
+  if (!log.others || !Object.keys(log.others).length) return log.days
+  const out = { ...log.days }
+  for (const [k, v] of Object.entries(log.others)) out[k] = (out[k] ?? 0) + v
+  return out
+}
+
+/** Sync listens here: preferences changed, a day's count changed, a sprint finished. */
+export const settingsHooks: { prefs?: () => void; day?: (day: string, words: number) => void; sprint?: (s: Sprint) => void } = {}
 
 function load<T>(key: string, fallback: T): T {
   try { const v = localStorage.getItem(key); return v ? { ...fallback, ...JSON.parse(v) } : fallback } catch { return fallback }
@@ -77,6 +93,10 @@ interface SettingsStore {
   set: (p: Partial<Settings>) => void
   addWords: (n: number) => void
   addSprint: (sp: Sprint) => void
+  /** Words your other devices wrote, per day (from sync). */
+  setOthers: (others: Record<string, number>) => void
+  /** Sprints finished on your other devices (from sync). */
+  mergeSprints: (list: Sprint[]) => void
 }
 
 /** Keys and servers that older builds let writers type in; they come only from the build now. */
@@ -96,7 +116,11 @@ function migrate(s: Settings): Settings {
 export const useSettings = create<SettingsStore>((set, get) => ({
   s: migrate(load('pageone-settings', DEFAULTS)),
   log: load<WritingLog>('pageone-log', { days: {}, sprints: [] }),
-  set: p => { const s = { ...get().s, ...p }; persist('pageone-settings', s); set({ s }) },
+  set: p => {
+    const s = { ...get().s, ...p }
+    persist('pageone-settings', s); set({ s })
+    if ('name' in p || 'dailyGoal' in p || 'accent' in p) settingsHooks.prefs?.()
+  },
   addWords: n => {
     if (n === 0) return
     const day = todayIso()
@@ -105,9 +129,24 @@ export const useSettings = create<SettingsStore>((set, get) => ({
     const next = { ...log, days }
     persist('pageone-log', next)
     set({ log: next })
+    settingsHooks.day?.(day, days[day])
   },
   addSprint: sp => {
     const next = { ...get().log, sprints: [sp, ...get().log.sprints].slice(0, 200) }
+    persist('pageone-log', next)
+    set({ log: next })
+    settingsHooks.sprint?.(sp)
+  },
+  setOthers: others => {
+    const next = { ...get().log, others }
+    persist('pageone-log', next)
+    set({ log: next })
+  },
+  mergeSprints: list => {
+    const have = new Set(get().log.sprints.map(x => x.at))
+    const add = list.filter(x => !have.has(x.at))
+    if (!add.length) return
+    const next = { ...get().log, sprints: [...get().log.sprints, ...add].sort((a, b) => b.at - a.at).slice(0, 200) }
     persist('pageone-log', next)
     set({ log: next })
   },

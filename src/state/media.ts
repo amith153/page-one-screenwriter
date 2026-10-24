@@ -4,7 +4,7 @@
  * IndexedDB instead. Web links are stored as-is (an http(s) URL) and never copied.
  */
 import { invoke } from '@tauri-apps/api/core'
-import { isTauri, join, openPath, remove } from '../platform/fs'
+import { isTauri, join, openWeb, remove } from '../platform/fs'
 import { libraryRoot } from './library'
 
 export const isLink = (ref: string) => /^https?:\/\//i.test(ref)
@@ -99,8 +99,7 @@ export async function deleteMedia(ref: string) {
 export function openLink(url: string) {
   // Web pages only: anything else (file://, a program path) is never handed to the system.
   const u = isLink(url) ? url : 'https://' + url.replace(/^[a-z]+:\/*/i, '')
-  if (isTauri) void openPath(u)
-  else window.open(u, '_blank', 'noopener')
+  void openWeb(u)
 }
 
 /** Ask for files (pictures, audio). */
