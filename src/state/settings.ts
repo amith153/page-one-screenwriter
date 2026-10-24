@@ -24,6 +24,10 @@ export const ACCENTS: { id: string; label: string; hex: string }[] = [
 
 export interface Settings {
   name: string
+  /** A random id for this install, stamped on lines you write; never a phone number or an email. */
+  authorId: string
+  /** Colour a bar beside each line by who wrote it. */
+  showAuthors: boolean
   theme: ThemeMode
   accent: string
   paper: PaperLook
@@ -52,7 +56,7 @@ export interface Settings {
 }
 
 const DEFAULTS: Settings = {
-  name: '', theme: 'dark', accent: 'champagne', paper: 'white', paperSize: 'LETTER', zoom: 1, dailyGoal: 500,
+  name: '', authorId: '', showAuthors: false, theme: 'dark', accent: 'champagne', paper: 'white', paperSize: 'LETTER', zoom: 1, dailyGoal: 500,
   typewriter: false, focusLine: false, sceneNumbers: true, autoContd: true, moreContd: true, sceneSpacing: 1,
   spellcheck: true, onboarded: false, noteColor: 0xFFE7B35A, boldHeadings: true, boldCharacters: false, watermarkOn: false, watermark: 'CONFIDENTIAL',
   watermarkOpacity: 0.12, dailyStill: true,
@@ -105,8 +109,9 @@ const RETIRED = ['tmdbKey', 'googleClientId', 'serverProjectId', 'serverApiKey',
 /** Scene headings are bold by default again (version 3); character names stay regular unless the writer asks. */
 function migrate(s: Settings): Settings {
   const old = RETIRED.some(k => k in s)
-  if (((s as Settings & { v?: number }).v ?? 0) >= 3 && !old) return s
+  if (((s as Settings & { v?: number }).v ?? 0) >= 3 && !old && s.authorId) return s
   const next: Settings & { v?: number } = { ...s }
+  if (!next.authorId) next.authorId = crypto.randomUUID()
   for (const k of RETIRED) delete (next as unknown as Record<string, unknown>)[k]
   if ((next.v ?? 0) < 3) Object.assign(next, { boldHeadings: true, v: 3 })
   persist('pageone-settings', next)

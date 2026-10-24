@@ -162,7 +162,6 @@ export function Home() {
           <span className="rail-label">Bring in</span>
           <button className="rail-item" onClick={newScript}><Icon name="plus" size={17} /><span>New script</span><kbd>Ctrl N</kbd></button>
           <button className="rail-item" onClick={doImport}><Icon name="import" size={17} /><span>Import</span></button>
-          <button className="rail-item" onClick={() => useModal.getState().open('join')}><Icon name="users" size={17} /><span>Join a script</span></button>
         </div>
         <span className="spacer" />
         <div className="rail-group">

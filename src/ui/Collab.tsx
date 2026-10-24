@@ -1,10 +1,9 @@
 /**
- * Writing together, two ways. Live, Overleaf-style: share a script with a join code, see who's here
- * and where, and follow every edit in the history (the same codes work in Page One on the phone).
- * Or pass drafts: send a file, get theirs back, and merge it change by change.
+ * Writing together by passing drafts: send a file, get theirs back, merge it change by change, and
+ * see who wrote which line (every line is stamped with the writer's name when they change it).
  */
 import { useEffect, useMemo, useState } from 'react'
-import { argbHex, pretty } from '../collab/hub'
+import { argbHex, authorList, credited } from '../core/authors'
 import { authorOf, TYPE_INFO, type Element } from '../core/model'
 import { alignIds, applyMerge, diffWords, planMerge, type MergeOp, type Resolution } from '../core/merge'
 import { scriptFromJson } from '../core/codec'
@@ -13,127 +12,53 @@ import { parseFdx } from '../core/fdx'
 import { exportPageOne, IMPORT_FILTERS } from '../io/files'
 import { pickFile } from '../platform/fs'
 import { listVersions, loadVersion, saveVersion, type VersionInfo } from '../state/library'
-import { useCollab } from '../state/collab'
 import { useDoc } from '../state/doc'
 import { useSettings } from '../state/settings'
-import { useApp } from './appState'
 import { Icon } from './Icon'
 import { confirmAction, Modal, Switch, toast, useModal } from './kit'
 
-const initials = (n: string) => n.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?'
-const ago = (t: number) => {
-  const m = Math.round((Date.now() - t) / 60000)
-  return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
-}
-
-/** Co-writers' faces in the title bar, and the Share button. */
+/** The Share button in the title bar. */
 export function CollabButton() {
   const script = useDoc(d => d.script)
-  const status = useCollab(c => c.status)
-  const peers = useCollab(c => c.peers)
-  const elements = useDoc(d => d.script?.elements)
   if (!script) return null
-  const live = status?.kind === 'live'
   return (
     <div className="collab-pill no-drag">
-      {peers.slice(0, 4).map(p => (
-        <button key={p.uid} className="avatar peer" style={{ background: argbHex(p.color) }} title={`${p.name} — ${p.elementId != null ? 'writing here · click to go there' : 'online'}`}
-          onClick={() => { if (p.elementId != null && elements?.some(e => e.id === p.elementId)) useDoc.getState().jumpTo(p.elementId) }}>
-          {initials(p.name)}
-        </button>
-      ))}
-      {peers.length > 4 && <span className="avatar peer more">+{peers.length - 4}</span>}
-      <button className={'btn sm ' + (live ? 'live' : 'ghost')} title="Share and co-write" onClick={() => useModal.getState().open('share')}>
-        <Icon name={live ? 'live' : 'share'} size={13} />{live ? 'Live' : status?.kind === 'connecting' ? 'Connecting…' : 'Share'}
+      <button className="btn sm ghost" title="Share a draft and merge theirs back in" onClick={() => useModal.getState().open('share')}>
+        <Icon name="share" size={13} />Share
       </button>
     </div>
   )
 }
 
-type ShareTab = 'live' | 'drafts'
-
 export function ShareModal() {
   const close = useModal(m => m.close)
   const script = useDoc(d => d.script)
-  const configured = useCollab(c => c.configured)()
   const name = useSettings(x => x.s.name)
+  const showAuthors = useSettings(x => x.s.showAuthors)
   const setSettings = useSettings(x => x.set)
-  const [tab, setTab] = useState<ShareTab>(configured ? 'live' : 'drafts')
   if (!script) return null
+  const authors = authorList(script.elements)
   return (
     <Modal title="Write together" icon="users" onClose={close} wide>
-      <div className="row" style={{ marginBottom: 16, flexWrap: 'wrap' }}>
-        <div className="seg">
-          <button className={tab === 'live' ? 'is-on' : ''} onClick={() => setTab('live')}><Icon name="live" size={14} />Live co-writing</button>
-          <button className={tab === 'drafts' ? 'is-on' : ''} onClick={() => setTab('drafts')}><Icon name="layers" size={14} />Pass drafts</button>
-        </div>
+      <div className="row" style={{ marginBottom: 16, flexWrap: 'wrap', gap: 14 }}>
+        <label className="row" style={{ gap: 8 }}>
+          <span className="eyebrow">You write as</span>
+          <input className="input sm" style={{ maxWidth: 180 }} value={name} placeholder="Your name" onChange={e => setSettings({ name: e.target.value })} />
+        </label>
         <span className="spacer" />
-        <span className="eyebrow">You appear as</span>
-        <input className="input sm" style={{ maxWidth: 180 }} value={name} placeholder="Your name" onChange={e => setSettings({ name: e.target.value })} />
+        <label className="row" style={{ gap: 8 }}>
+          <span className="eyebrow">Show who wrote what</span>
+          <Switch on={showAuthors} onChange={v => setSettings({ showAuthors: v })} label="Show who wrote what" />
+        </label>
       </div>
-      {tab === 'live' ? <LiveTab /> : <DraftsTab />}
+      {showAuthors && (
+        <div className="row" style={{ flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+          {authors.map(a => <span key={a.id} className="chip"><span className="avatar mini" style={{ background: argbHex(a.color) }} />{a.name} · {a.lines} line{a.lines === 1 ? '' : 's'}</span>)}
+          {authors.length === 0 && <span className="faint" style={{ fontSize: 12 }}>Nobody's name is on a line yet — lines are stamped as they're written.</span>}
+        </div>
+      )}
+      <DraftsTab />
     </Modal>
-  )
-}
-
-function LiveTab() {
-  const script = useDoc(d => d.script)!
-  const c = useCollab()
-  const name = useSettings(x => x.s.name)
-  const [code, setCode] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
-  if (!c.configured()) return <LiveUnavailable />
-  const live = c.isLive(script.id) && c.scriptId === script.id
-
-  const makeCode = async () => {
-    setBusy(true)
-    try { setCode(await c.newCode()) } catch (e) { toast((e as Error).message, 'close') } finally { setBusy(false) }
-  }
-  const invite = code && `Let's write “${script.title}” together in Page One.\n\nJoin code: ${pretty(code)}\n\nOpen Page One → tap Join (the person-plus icon) → type the code.\nOr tap: pageone://join/${code}`
-
-  return (
-      <>
-        <div className="share-top">
-          <div className="grow">
-            <div className="row"><b>Live co-writing</b>{live && <StatusChip />}</div>
-            <div className="muted" style={{ fontSize: 12.5, marginTop: 3 }}>Everyone with the code edits this script at the same time — on desktop or in Page One on the phone. Edits merge line by line.</div>
-          </div>
-          <Switch on={live} onChange={v => { if (v) c.goLive(); else c.stopLive() }} label="Live co-writing" />
-        </div>
-        {c.status?.kind === 'error' && <div className="callout warn"><Icon name="close" size={14} />{c.status.message}</div>}
-
-        <div className="share-grid">
-          <div className="panel share-card">
-            <h3>Invite a co-writer</h3>
-            {code ? <>
-              <div className="join-code tabular">{pretty(code)}</div>
-              <div className="faint" style={{ fontSize: 11.5 }}>Works for 7 days. Each invite gets its own code.</div>
-              <div className="row" style={{ marginTop: 12, flexWrap: 'wrap' }}>
-                <button className="btn sm" onClick={() => { void navigator.clipboard.writeText(pretty(code)); toast('Code copied', 'copy') }}><Icon name="copy" size={13} />Copy code</button>
-                <button className="btn ghost sm" onClick={() => { void navigator.clipboard.writeText(invite!); toast('Invite copied — paste it into a message', 'copy') }}><Icon name="share" size={13} />Copy invite</button>
-                <button className="btn quiet sm" disabled={busy} onClick={makeCode}>New code</button>
-              </div>
-            </> : <>
-              <p className="muted" style={{ fontSize: 12.5 }}>Make a short code to send. Your co-writer types it into Page One — desktop or phone.</p>
-              <button className="btn" disabled={busy} onClick={makeCode}><Icon name="plus" size={14} />{busy ? 'Making a code…' : 'Make a join code'}</button>
-            </>}
-          </div>
-          <div className="panel share-card">
-            <h3><Icon name="phone" size={13} /> Your phone</h3>
-            <p className="muted" style={{ fontSize: 12.5 }}>To carry on writing this script on your phone, make a code here, then in <b>Page One</b> on the phone tap <b>Join</b> and type it. Phone and desktop then stay in sync live.</p>
-          </div>
-        </div>
-
-        {live && <>
-          <div className="section-title" style={{ marginTop: 18 }}>Here now</div>
-          <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
-            <span className="chip"><span className="avatar mini" style={{ background: 'var(--accent)' }}>{initials(name || 'Me')}</span>You</span>
-            {c.peers.map(p => <span key={p.uid} className="chip"><span className="avatar mini" style={{ background: argbHex(p.color) }}>{initials(p.name)}</span>{p.name}</span>)}
-            {c.peers.length === 0 && <span className="faint" style={{ fontSize: 12 }}>Nobody else yet.</span>}
-          </div>
-          <History />
-        </>}
-      </>
   )
 }
 
@@ -229,6 +154,7 @@ function DraftsTab() {
 const Words = ({ before, after }: { before: string; after: string }) => (
   <>{diffWords(before, after).map((p, i) => (p.op === 'SAME' ? <span key={i}>{p.text}</span> : p.op === 'ADDED' ? <ins key={i}>{p.text}</ins> : <del key={i}>{p.text}</del>))}</>
 )
+const credit = (els: Element[], name: string) => els.map(e => credited(e, name))
 const KIND: Record<MergeOp['kind'], string> = { change: 'Changed', add: 'Added', delete: 'Cut', conflict: 'You both changed' }
 
 function MergeReview({ incoming, versions, onBack }: { incoming: Incoming; versions: VersionInfo[]; onBack: () => void }) {
@@ -252,7 +178,7 @@ function MergeReview({ incoming, versions, onBack }: { incoming: Incoming; versi
   const apply = async (whole: boolean) => {
     await useDoc.getState().snapshot(`Before merging ${incoming.from}'s draft`)
     const elements = whole ? incoming.elements : applyMerge(base?.elements ?? null, script.elements, incoming.elements, ops, accepted, resolutions, incoming.from).elements
-    useDoc.getState().update(s => ({ ...s, elements }))
+    useDoc.getState().update(s => ({ ...s, elements: whole ? credit(elements, incoming.from) : elements }), { unstamped: true })
     toast(`${whole ? 'Replaced with' : 'Merged'} ${incoming.from}'s draft — your own is saved under Versions`, 'check')
     useModal.getState().close()
   }
@@ -292,7 +218,7 @@ function MergeReview({ incoming, versions, onBack }: { incoming: Incoming; versi
               </div>
             ) : <Switch on={accepted.has(o.id)} onChange={() => toggle(o.id)} label="Accept this change" />}
             <div className="grow" style={{ minWidth: 0 }}>
-              <div className="merge-kind">{KIND[o.kind]} · {TYPE_INFO[(o.kind === 'delete' ? o.mine : o.theirs).type].label}</div>
+              <div className="merge-kind">{KIND[o.kind]} · {TYPE_INFO[(o.kind === 'delete' ? o.mine : o.theirs).type].label}{o.kind !== 'delete' && ` · by ${o.theirs.byName || incoming.from}`}{o.kind === 'conflict' && ` and ${o.mine.byName || 'you'}`}</div>
               {o.kind === 'change' && <div className="merge-diff"><Words before={o.mine.text} after={o.theirs.text} /></div>}
               {o.kind === 'add' && <div className="merge-diff"><ins>{o.theirs.text || '(blank line)'}</ins></div>}
               {o.kind === 'delete' && <div className="merge-diff"><del>{o.mine.text || '(blank line)'}</del></div>}
@@ -313,87 +239,4 @@ function MergeReview({ incoming, versions, onBack }: { incoming: Incoming; versi
     </div>
     <p className="faint" style={{ fontSize: 11.5, marginBottom: 0 }}>“Both” keeps your line with theirs in a note right under it. Before anything changes, your draft is saved under Versions.</p>
   </>
-}
-
-function StatusChip() {
-  const st = useCollab(c => c.status)
-  if (!st) return null
-  return <span className={'chip live-chip ' + st.kind}>{st.kind === 'live' ? <><span className="live-dot" />Live</> : st.kind === 'connecting' ? 'Connecting…' : 'Offline'}</span>
-}
-
-function History() {
-  const changes = useCollab(c => c.changes)
-  const me = useCollab(c => c.uid)
-  const elements = useDoc(d => d.script?.elements ?? [])
-  const [mine, setMine] = useState(false)
-  const list = changes.filter(c => mine || c.uid !== me).slice(0, 80)
-  return <>
-    <div className="row" style={{ marginTop: 18 }}>
-      <div className="section-title" style={{ margin: 0 }}>History</div>
-      <span className="spacer" />
-      <button className={'chip' + (mine ? ' accent' : '')} onClick={() => setMine(!mine)}>Include mine</button>
-    </div>
-    {list.length === 0 && <div className="faint" style={{ fontSize: 12, marginTop: 8 }}>Edits by co-writers show up here.</div>}
-    <div className="history">
-      {list.map(h => {
-        const exists = elements.some(e => e.id === h.elementId)
-        return (
-          <div key={h.id} className="hist-row" onClick={() => { if (exists) { useDoc.getState().jumpTo(h.elementId); useModal.getState().close() } }} style={{ cursor: exists ? 'pointer' : 'default' }}>
-            <span className="avatar mini" style={{ background: argbHex(h.color) }}>{initials(h.name)}</span>
-            <div className="grow">
-              <div style={{ fontSize: 12 }}><b>{h.name}</b> <span className="faint">{h.kind === 'add' ? 'added' : h.kind === 'delete' ? 'deleted' : h.kind === 'format' ? 'changed a line to' : 'edited'} · {ago(h.at)}</span></div>
-              {h.kind === 'edit' ? <div className="hist-diff"><del>{h.before}</del> <ins>{h.after}</ins></div>
-                : <div className="hist-diff">{h.kind === 'delete' ? <del>{h.before}</del> : h.kind === 'format' ? `${h.before} → ${h.after}` : <ins>{h.after}</ins>}</div>}
-            </div>
-            {h.kind === 'edit' && exists && h.uid !== me && (
-              <button className="btn quiet sm" title="Put this line back as it was" onClick={e => {
-                e.stopPropagation()
-                useDoc.getState().update(s => ({ ...s, elements: s.elements.map(x => (x.id === h.elementId ? { ...x, text: h.before, orig: null } : x)) }))
-                toast('Line restored', 'undo')
-              }}>Revert</button>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  </>
-}
-
-/** A copy of Page One built without a live-sync server (built from source without keys, say). */
-export function LiveUnavailable() {
-  return (
-    <div className="callout"><Icon name="cloud" size={15} />
-      <span>Live co-writing isn't switched on in this copy of Page One. You can still write together by passing drafts back and forth.</span>
-    </div>
-  )
-}
-
-/** "Join a script" — from the library. */
-export function JoinModal() {
-  const close = useModal(m => m.close)
-  const join = useCollab(c => c.join)
-  const configured = useCollab(c => c.configured)()
-  const [text, setText] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState('')
-  const go = async () => {
-    setBusy(true); setErr('')
-    try {
-      const id = await join(text)
-      close()
-      await useApp.getState().refresh()
-      await useApp.getState().openScript(id)
-      toast('Joined — you\'re writing together', 'users')
-    } catch (e) { setErr((e as Error).message) } finally { setBusy(false) }
-  }
-  return (
-    <Modal title="Join a script" icon="users" onClose={close}
-      foot={configured ? <><button className="btn ghost" onClick={close}>Cancel</button><button className="btn" disabled={busy || !text.trim()} onClick={go}>{busy ? 'Joining…' : 'Join'}</button></> : undefined}>
-      {configured ? <>
-        <p className="muted" style={{ marginTop: 0 }}>Type the code your co-writer sent — or the one you made on your phone (Share › Join code). A whole message with the code in it works too.</p>
-        <input className="input join-input" autoFocus value={text} placeholder="K7QP-X2MA" onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && text.trim()) void go() }} />
-        {err && <div className="callout warn" style={{ marginTop: 10 }}>{err}</div>}
-      </> : <LiveUnavailable />}
-    </Modal>
-  )
 }

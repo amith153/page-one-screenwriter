@@ -18,7 +18,7 @@ export function exportMenu(anchor: HTMLElement) {
     { label: 'Fountain', icon: 'script', run: () => void exportFountain(useDoc.getState().script!) },
     { label: 'Page One file (.pageone)', icon: 'copy', run: () => void exportPageOne(useDoc.getState().script!) },
     { label: 'Google Drive…', icon: 'cloud', run: () => useModal.getState().open('drive') },
-    { label: 'Share & co-write…', icon: 'users', run: () => useModal.getState().open('share') },
+    { label: 'Share & merge…', icon: 'users', run: () => useModal.getState().open('share') },
     { divider: true },
     { label: 'Print…', icon: 'page', hint: 'Ctrl+P', run: printNow },
     { label: 'Sides for actors…', icon: 'users', run: () => useModal.getState().open('sides') },

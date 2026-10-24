@@ -79,7 +79,7 @@ export function nodeToElement(n: PMNode): Element {
     if (text !== typed) orig = typed
   }
   return {
-    id: n.attrs.id as number, type, text, orig,
+    id: n.attrs.id as number, type, text, orig, by: null, byName: null, at: 0,
     dual: n.attrs.dual as boolean, revision: n.attrs.revision as number, color: n.attrs.color as number, synopsis: n.attrs.synopsis as string,
   }
 }

@@ -16,7 +16,7 @@ This guide covers how to use every part of it. Developer notes are at the end.
 
 Windows may show "Windows protected your PC" because the installer is not code-signed yet: choose **More info, then Run anyway**. Android may warn the same way: choose **Install anyway**.
 
-The downloads contain **no server keys**. Writing, planning, exporting, printing and **Wi-Fi sync with the phone app** all work. Live co-writing with other people, Google Drive and daily film stills need keys of your own: build the app yourself (see For developers and `.env.example`). Your scripts never leave your devices.
+The downloads contain **no server keys**. Writing, planning, exporting, printing and **Wi-Fi sync with the phone app** all work. Google Drive and daily film stills need keys of your own: build the app yourself (see For developers and `.env.example`). Your scripts never leave your devices.
 
 **License:** MIT, © 2026 Amith ([@amith153](https://github.com/amith153)). See `LICENSE` and `THIRD_PARTY_NOTICES.md`.
 
@@ -33,7 +33,7 @@ The downloads contain **no server keys**. Writing, planning, exporting, printing
 7. [Goals, sprints, deadlines and focus](#7-goals-sprints-deadlines-and-focus)
 8. [Production: revisions, versions, lock, reports, sides](#8-production)
 9. [Exporting and printing](#9-exporting-and-printing)
-10. [Co-writing live, and working with your phone](#10-co-writing-live-and-working-with-your-phone)
+10. [Writing together, and working with your phone](#10-writing-together-and-working-with-your-phone)
 11. [Google Drive](#11-google-drive)
 12. [Writing in Kannada, Hindi and other languages](#12-writing-in-kannada-hindi-and-other-languages)
 13. [Settings](#13-settings)
@@ -54,7 +54,7 @@ Settings › Sync pairs this computer with the Page One Android app (or another 
 
 What follows you: projects (new, edited and deleted), daily words, streak and writing year, sprints, daily goal, name and accent. Newest copy wins; a copy that would be replaced while holding changes the other side never saw is first kept under Versions as "Before Wi-Fi sync". A project that is open on a device is left alone until you close it. Pictures and voice notes stay on the device they were added on. The first time, Windows may ask to let Page One use private networks: choose Allow.
 
-Traffic stays on your local network and is not encrypted, so use it on a network you trust. Live co-writing with other people (join codes) is a separate feature that needs a Firebase server of your own; see `.env.example`.
+Traffic stays on your local network and is not encrypted, so use it on a network you trust.
 
 ## 1. Getting started
 
@@ -62,13 +62,13 @@ Traffic stays on your local network and is not encrypted, so use it on a network
 
 **Start a script.** On the home screen, click **New script** (or press **Ctrl+N**). To bring in an existing script, click **Import** and choose a Fountain (`.fountain`), Final Draft (`.fdx`) or Page One (`.pageone`) file.
 
-**Where scripts are kept.** Every script is saved automatically, as you type, in `Documents/Page One/` on your computer. Nothing is uploaded unless you use Google Drive or co-writing. Settings › Files › Library folder opens it.
+**Where scripts are kept.** Every script is saved automatically, as you type, in `Documents/Page One/` on your computer. Nothing is uploaded unless you use Google Drive. Settings › Files › Library folder opens it.
 
 ---
 
 ## 2. The home screen
 
-The left rail jumps between sections and holds the main actions: **New script**, **Import**, **Join a script** (with a co-writer's code), **Drive** and **Settings**. Use the search box in the title bar to filter your scripts by title, writer or logline.
+The left rail jumps between sections and holds the main actions: **New script**, **Import**, **Drive** and **Settings**. Use the search box in the title bar to filter your scripts by title, writer or logline.
 
 - **Continue writing.** The script you were last in, one click away.
 - **Today's line.** A famous line from a film, with a still from that film behind it. Phone and desktop show the same line each day.
@@ -239,26 +239,21 @@ The PDF options are:
 
 ---
 
-## 10. Co-writing live, and working with your phone
+## 10. Writing together, and working with your phone
 
-Desktop and phone share one live-sync service, so a co-writer on a laptop and you on your phone can edit the same script together.
+Page One is built for passing a script back and forth, not for typing in the same file at once. Your phone is paired over Wi-Fi (see the sync section above).
 
-1. Open the script and click **Share** in the title bar. You get an 8-letter join code (like `K7QP-X2MA`) and a link.
-2. Your co-writer clicks **Join a script** on the home screen (or "Join a shared script" on the phone) and types the code, or pastes the whole message.
-3. You both edit live. Co-writers' cursors show in their colours, **follow** keeps you on their line, and **Changes** lists every edit so you can revert one.
-
-The story bible, beats, storylines, breakdown, lock, deadline and notes are shared. Pictures and voice notes stay on the device that added them.
-
-**Passing drafts back and forth (no connection needed).** In **Share › Pass drafts**:
+**Passing drafts back and forth (no connection needed).** In **Share**:
 
 1. **Save draft to send** makes a `.pageone` file to email or message, and keeps a copy of the draft as it left (a "Sent draft" version).
 2. Your co-writer works on it in Page One, or exports it to Final Draft, Fountain, Fade In or Highland and works there.
 3. **Open their draft…** reads what comes back (`.pageone`, Fountain or Final Draft) and compares it with the draft you sent, so Page One knows which changes are theirs and which are yours. Every change is listed: accept it or turn it down, and where you both changed a line, keep **Mine**, take **Theirs**, or keep **Both** (theirs goes in a note under yours). **Take their whole draft** replaces yours instead.
 4. Your draft is saved under Versions before anything changes.
 
-**Moving a script without going live.** Export a `.pageone` file and import it on the other device. You can also copy a script's file from the phone into `Documents/Page One/scripts/`, or use Google Drive.
+**Who wrote what.** Every line is stamped with the name of the writer who last changed it (set the name under **You write as** in Share) plus a random id that stays on that install, never a phone number or email. Each change in the merge list says who made it. Turn on **Show who wrote what** (in Share or Settings) for a coloured bar beside each line; hover a line to see the name and time. Lines from a file with no stamps (Final Draft, Fountain) are credited to the name on that draft. If two people changed the same line, you see both versions and choose; afterwards only the last editor is on the line.
 
-> Live co-writing works in builds made with the live-sync keys (see [section 17](#17-for-developers)). A build without them still has **Pass drafts**.
+**Moving a script by hand.** Export a `.pageone` file and import it on the other device. You can also copy a script's file from the phone into `Documents/Page One/scripts/`, or use Google Drive.
+
 
 ---
 
@@ -354,7 +349,7 @@ The Android app (Android 8.0 and later) has everything above. These parts are ph
 - **Widgets.** Idea inbox, and Writing goal (today's ring, your streak and a quote).
 - **Reminders**, each with its own switch: a daily writing reminder, deadline countdowns, streak at risk, the sprint bell, a weekly inbox nudge and goal celebrations.
 - **Annotated PDF.** "Include notes & references" colour-marks noted text in the export.
-- **Merge.** Send a `.pageone` file to a co-writer and merge their copy back in. Conflicts are marked with notes.
+- **Merge.** Send a `.pageone` file to a co-writer and merge their copy back in, with each change credited to its writer. Conflicts are marked with notes.
 - **Backup.** Automatic Google Drive backup, or a copy kept in sync in Dropbox, OneDrive or any storage app.
 - **Tablets and keyboards.** On wide screens the navigator or cards sit beside the script, and the keyboard shortcuts work.
 - **Spell check** with a 160,000-word dictionary that includes film slang. Character names are never flagged.
@@ -370,7 +365,6 @@ Both apps use the same robin icon, a geometric bird whose wing is the folded cor
 | **Export says "Failed to fetch"** | This came from running the development build while its dev server re-bundled. It's fixed, so restart the app. For everyday use, install the release build (`npm run tauri build`), which doesn't need the dev server. |
 | **Google Drive won't connect** | Check the four setup steps in [section 11](#11-google-drive). The usual causes are a missing `http://localhost:47823` redirect URI, your account not added as a test user, or the Drive API not enabled. If port 47823 is busy, close whatever is using it. |
 | **"On the phone" instead of a picture** | The picture was added on the phone. Attachments stay on the device that added them. |
-| **Co-writing or join codes don't work** | The build has no live-sync keys (see [section 17](#17-for-developers)). Use **Share › Pass drafts** instead. |
 | **Chinese, Japanese or Korean text in the PDF** | Use **Print › Save as PDF**. |
 | **Scene headings are bold and you don't want them** | Settings › Bold scene headings (on by default). |
 
@@ -390,11 +384,10 @@ npm run tauri build    # installers in src-tauri/target/release/bundle
 
 It needs Node 20+ and Rust (stable). On Windows, WebView2 is part of Windows 11.
 
-**Keys.** Copy `.env.example` to `.env.local` and fill in what you need; they are read at build time and writers never see or change them. Live sync takes the three values from the phone's `collab.properties`. `VITE_TMDB_KEY` is for film stills and `VITE_GOOGLE_CLIENT_ID` is for Drive (see [section 11](#11-google-drive)). Every key is optional: without them the app still writes, exports and passes drafts; live co-writing, Drive and TMDb stills simply switch off.
+**Keys.** Copy `.env.example` to `.env.local` and fill in what you need; they are read at build time and writers never see or change them. `VITE_TMDB_KEY` is for film stills and `VITE_GOOGLE_CLIENT_ID` is for Drive (see [section 11](#11-google-drive)). Every key is optional: without them the app still writes, exports and passes drafts; Drive and TMDb stills simply switch off.
 
 **Open source and keys.** `.env.local` is git-ignored (`*.local`), so the keys never enter the repository. Anyone who builds from source brings their own keys, or none. Keys baked into a released app can still be read out of it by a determined user, so treat them as public identifiers and protect what they unlock:
 
-- **Firebase (live sync).** The web API key only identifies the project; security comes from Firestore rules. Keep rules that only let signed-in users read and write the scripts they are members of, turn on App Check, and in Google Cloud › Credentials restrict the API key to the Firebase APIs it needs.
 - **Google Drive.** An OAuth client ID is public by design (the app uses the token flow with no client secret). Keep the redirect URI list to `http://localhost:47823`, and publish the consent screen when you leave Testing.
 - **TMDb.** A read-only key with rate limits. If it is ever abused, regenerate it, or proxy the stills through a small server of your own.
 - Before the first public commit, check nothing secret was ever committed (`git log -p | grep -i "AIza\|apps.googleusercontent"`), and rotate any key that was.
@@ -406,7 +399,7 @@ It needs Node 20+ and Rust (stable). On Windows, WebView2 is part of Windows 11.
 | Editor | ProseMirror: one block per screenplay element, Final Draft keys | `src/editor/` |
 | UI | React and Zustand, with a hand-built design system (Inter, Fraunces, Courier Prime). The logo is in `src/ui/Logo.tsx` | `src/ui/`, `src/styles/` |
 | Export | PDF drawn line by line from the paginator (pdf-lib with embedded Noto fonts), FDX, Fountain, Word, RTF, text, HTML and CSV, to disk or Drive | `src/io/` |
-| Co-writing | Firestore live sessions, a port of the phone's `collab/` | `src/collab/`, `src/state/collab.ts` |
+| Authorship | Per-line author stamps, stamped on edit and credited on merge | `src/core/authors.ts`, `src/core/merge.ts` |
 | Media | Note attachments and the mood board, in `<library>/media/` like the phone | `src/state/media.ts` |
 | Home content | Daily film line (`films.tsv`, the same pick as the phone), the Discover shelf | `src/data/` |
 

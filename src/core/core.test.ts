@@ -11,6 +11,7 @@ import { checkBeats, createStructure, template } from './structures'
 import { decodeScript, encodeScript } from './codec'
 import { parseFountain, writeFountain } from './fountain'
 import { parseFdx, writeFdx } from './fdx'
+import { authorList, stampEdits } from './authors'
 import { alignIds, applyMerge, planMerge, threeWay } from './merge'
 
 let nextId = 1
@@ -366,6 +367,31 @@ describe('File formats', () => {
     expect(r.conflicts).toBe(0)
     expect(r.elements[1].text).toBe('Maya pours tea.')
     expect(r.elements[13].text).toBe('Heavy rain.')
+  })
+
+  it('stamps only the lines a writer changed, and keeps older stamps', () => {
+    const amith = { id: 'a-1', name: 'Amith' }, sam = { id: 's-1', name: 'Sam' }
+    const first = stampEdits([], sample, amith, 100)
+    expect(first.every(e => e.by === 'a-1' && e.byName === 'Amith' && e.at === 100)).toBe(true)
+    const edited = first.map(e => (e.id === first[2].id ? { ...e, text: e.text + ' Rain.', by: null, byName: null, at: 0 } : { ...e, by: null, byName: null, at: 0 }))
+    const second = stampEdits(first, edited, sam, 200)
+    expect(second[2].by).toBe('s-1')
+    expect(second[2].at).toBe(200)
+    expect(second[1].by).toBe('a-1')
+    expect(authorList(second).map(a => [a.name, a.lines])).toEqual([['Amith', sample.length - 1], ['Sam', 1]])
+  })
+
+  it('a merge credits what came from their draft to them, by name when their file has no stamps', () => {
+    const base = sample
+    const local = base.map(e => (e.id === base[1].id ? { ...e, text: 'Maya pours tea.', by: 'me', byName: 'Amith', at: 5 } : e))
+    const added = mk(9002, 'ACTION', 'Thunder.')
+    const remote = [...base.slice(0, 13), added, ...base.slice(13)].map(e => (e.id === base[13].id ? { ...e, text: 'Heavy rain.', by: 'sam', byName: 'Sam', at: 9 } : e))
+    const r = threeWay(base, local, remote, 'Sam')
+    const byId = new Map(r.elements.map(e => [e.id, e]))
+    expect(byId.get(base[1].id)!.byName).toBe('Amith')
+    expect(byId.get(9002)!.byName).toBe('Sam')
+    expect(byId.get(9002)!.by).toBe('guest:sam')
+    expect(byId.get(base[13].id)!.by).toBe('sam')
   })
 
   it('a returned draft can be merged change by change', () => {

@@ -2,6 +2,7 @@
  * Three-way merge of two versions of a script that share element ids (port of `core/Merge.kt`),
  * and a word-level diff (port of `core/Diff.kt`).
  */
+import { credited } from './authors'
 import { el, newId, type Element } from './model'
 
 export interface MergeResult { elements: Element[]; added: number; changed: number; deleted: number; conflicts: number }
@@ -26,12 +27,12 @@ export function threeWay(base: Element[] | null, local: Element[], remote: Eleme
     const b = B.get(l.id)
     if (r) {
       if (same(l, r)) keep.set(l.id, l)
-      else if (b && same(l, b)) { keep.set(l.id, { ...r, revision: Math.max(l.revision, r.revision) }); changed++ }
+      else if (b && same(l, b)) { keep.set(l.id, { ...credited(r, theirName), revision: Math.max(l.revision, r.revision) }); changed++ }
       else if (b && same(r, b)) keep.set(l.id, l)
       else {
         const how = resolve(l.id)
-        keep.set(l.id, how === 'theirs' ? r : l)
-        if (how === 'both') conflictNotes.set(l.id, el(ids(), 'NOTE', `${theirName}'s version: ${r.text}`))
+        keep.set(l.id, how === 'theirs' ? credited(r, theirName) : l)
+        if (how === 'both') conflictNotes.set(l.id, credited(el(ids(), 'NOTE', `${theirName}'s version: ${r.text}`), theirName))
         conflicts++
       }
     } else if (b && same(l, b)) deleted++
@@ -40,7 +41,7 @@ export function threeWay(base: Element[] | null, local: Element[], remote: Eleme
   for (const r of remote) {
     if (L.has(r.id)) continue
     const b = B.get(r.id)
-    if (!b || !same(r, b)) { keep.set(r.id, r); added++ }
+    if (!b || !same(r, b)) { keep.set(r.id, credited(r, theirName)); added++ }
   }
 
   // Order: if we didn't reorder anything since the base but they did, follow theirs.

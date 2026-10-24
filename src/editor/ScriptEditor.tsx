@@ -7,6 +7,7 @@ import { keymap } from 'prosemirror-keymap'
 import { baseKeymap } from 'prosemirror-commands'
 import { ELEMENT_TYPES, newScript, type Element } from '../core/model'
 import { contd } from '../core/analysis'
+import { authorsOf } from '../core/authors'
 import { parseFountain, writeFountain } from '../core/fountain'
 import { useDoc } from '../state/doc'
 import { useSettings } from '../state/settings'
@@ -24,7 +25,6 @@ import { addNoteFromSelection } from '../ui/notes'
 import { useFitZoom } from '../ui/useFitZoom'
 import { useFocus } from '../ui/Focus'
 import { Icon } from '../ui/Icon'
-import { useCollab } from '../state/collab'
 
 const nodeCache = new WeakMap<PMNode, Element>()
 function toElements(doc: PMNode): Element[] {
@@ -60,7 +60,6 @@ export function ScriptEditor() {
   const activeComment = useDoc(d => d.activeComment)
   const jump = useDoc(d => d.jump)
   const settings = useSettings(s => s.s)
-  const peers = useCollab(c => c.peers)
 
   // ---- create the view (once per script)
   useEffect(() => {
@@ -229,7 +228,6 @@ export function ScriptEditor() {
     const nodes: PMNode[] = []
     for (let i = a; i < m - b; i++) nodes.push(doc.child(i))
     const tr = v.state.tr.replaceWith(from, to, Fragment.from(nodes)).setMeta('external', true)
-    if (useDoc.getState().lastChangeRemote) tr.setMeta('addToHistory', false)
     const sel = tr.mapping.map(v.state.selection.from, -1)
     tr.setSelection(TextSelection.near(tr.doc.resolve(Math.min(Math.max(1, sel), tr.doc.content.size - 1))))
     v.dispatch(tr)
@@ -243,10 +241,11 @@ export function ScriptEditor() {
     const meta: PageMeta = {
       elementPage: pagination.elementPage, labels: pagination.labels, sceneLabels: labels, contd: contdFlags,
       showSceneNumbers: settings.sceneNumbers, comments: comments ?? [], activeComment, focusLine: settings.focusLine,
-      findQuery: find.open ? find.query : '', peers,
+      findQuery: find.open ? find.query : '',
+      authors: settings.showAuthors ? authorsOf(useDoc.getState().script?.elements ?? []) : undefined,
     }
     v.dispatch(v.state.tr.setMeta(metaKey, meta).setMeta('addToHistory', false))
-  }, [pagination, labels, contdFlags, settings.sceneNumbers, settings.focusLine, comments, activeComment, find, peers])
+  }, [pagination, labels, contdFlags, settings.sceneNumbers, settings.focusLine, comments, activeComment, find, settings.showAuthors])
 
   // ---- track changes: redraw when the baseline or the toggle changes
   const changesBase = useChanges(c => c.base)

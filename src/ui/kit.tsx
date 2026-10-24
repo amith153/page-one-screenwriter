@@ -147,7 +147,7 @@ export function Lightbox({ src, alt = '', onClose }: { src: string; alt?: string
 }
 
 /** Which modal is open, app-wide. */
-export type ModalId = 'settings' | 'export' | 'titlepage' | 'versions' | 'shortcuts' | 'sprint' | 'reports' | 'sides' | 'deadline' | 'share' | 'join' | 'drive' | null
+export type ModalId = 'settings' | 'export' | 'titlepage' | 'versions' | 'shortcuts' | 'sprint' | 'reports' | 'sides' | 'deadline' | 'share' | 'drive' | null
 export const useModal = create<{ id: ModalId; open: (id: ModalId) => void; close: () => void }>(set => ({
   id: null, open: id => set({ id }), close: () => set({ id: null }),
 }))

@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useDoc } from './state/doc'
-import './state/collab'
 import { useSettings } from './state/settings'
 import { ScriptEditor } from './editor/ScriptEditor'
 import { TitleBar } from './ui/TitleBar'

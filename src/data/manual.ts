@@ -64,13 +64,13 @@ export const MANUAL: Chapter[] = [
     ],
   },
   {
-    id: 'together', icon: 'users', title: 'Writing together', summary: 'Live co-writing, or pass drafts back and forth.',
+    id: 'together', icon: 'users', title: 'Writing together', summary: 'Pass drafts back and forth, merge them, and see who wrote what.',
     steps: [
-      'Open **Share** at the top right. **Live co-writing**: make a join code and send it; everyone with the code edits the script at the same time — on desktop or on Page One for the phone.',
-      'Join someone else\'s script from the home screen: **Join a script**, then type their code.',
-      '**Pass drafts** works without a connection. **Save draft to send** makes a .pageone file and remembers the draft as it left.',
+      'Open **Share** at the top right. Set the name you **write as**: every line you change is stamped with it (a random id, never your phone number or email).',
+      '**Save draft to send** makes a .pageone file and remembers the draft as it left. No connection is needed.',
       'When their draft comes back (.pageone, Fountain or Final Draft), **Open their draft…** lists every change. Accept or turn down each one; where you both changed the same line, keep **Mine**, take **Theirs**, or keep **Both** (theirs goes in a note under yours).',
       'Before any merge your draft is saved under Versions, so nothing is ever lost.',
+      'Switch on **Show who wrote what** (in Share, or Settings) for a coloured bar beside each line, by the writer who last changed it. Hover a line for the name and time. Each change in the merge list says who made it.',
     ],
   },
   {

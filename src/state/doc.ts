@@ -4,12 +4,19 @@
  * editor picks those changes up as one undoable step.
  */
 import { create } from 'zustand'
+import { stampEdits } from '../core/authors'
 import { countWords, pruneExtras, TYPE_INFO, type Element, type Script } from '../core/model'
 import { Paginator, defaultLayout, linesPerPage, type LayoutOptions, type Pagination } from '../core/paginator'
 import { forcedBreaks, sceneLabels } from '../core/production'
 import { loadScript, saveScript, saveVersion } from './library'
 import { useSettings } from './settings'
 import { useChanges } from './changes'
+
+/** This install as an author: its random id and the name it writes under. */
+export const me = () => {
+  const s = useSettings.getState().s
+  return { id: s.authorId, name: s.name.trim() || 'Writer' }
+}
 
 export type View = 'script' | 'cards' | 'page' | 'story' | 'board' | 'production'
 export type Panel = 'scene' | 'doctor' | 'notes' | 'changes' | 'stats' | null
@@ -29,15 +36,13 @@ interface DocStore {
   jump: { id: number; n: number; select?: [number, number] } | null
   sessionWords: number
   activeComment: string | null
-  /** The last change came from a co-writer (live sync), not from this computer. */
-  lastChangeRemote: boolean
   open: (id: string) => Promise<void>
   openScript: (s: Script) => void
   close: () => Promise<void>
   /** Elements from the editor (as the writer types). */
   fromEditor: (els: Element[]) => void
   /** Any other change to the script. */
-  update: (f: (s: Script) => Script, opts?: { elementsChanged?: boolean; remote?: boolean }) => void
+  update: (f: (s: Script) => Script, opts?: { elementsChanged?: boolean; unstamped?: boolean }) => void
   setView: (v: View) => void
   setPanel: (p: Panel) => void
   toggleSidebar: () => void
@@ -103,7 +108,7 @@ export const useDoc = create<DocStore>((set, get) => {
 
   return {
     script: null, pagination: null, sceneLabels: new Map(), externalRev: 0, saved: 'saved', view: 'script', panel: null,
-    sidebar: true, currentId: null, jump: null, sessionWords: 0, activeComment: null, lastChangeRemote: false,
+    sidebar: true, currentId: null, jump: null, sessionWords: 0, activeComment: null,
 
     open: async id => { get().openScript(await loadScript(id)) },
 
@@ -127,8 +132,9 @@ export const useDoc = create<DocStore>((set, get) => {
     fromEditor: els => {
       const s = get().script
       if (!s) return
-      const next = s.revisionMode ? markRevisions(s.elements, els, s.revisionLevel) : els
-      set({ script: { ...s, elements: next, extras: pruneExtras(s.extras, next), modifiedAt: Date.now() }, lastChangeRemote: false })
+      const marked = s.revisionMode ? markRevisions(s.elements, els, s.revisionLevel) : els
+      const next = stampEdits(s.elements, marked, me())
+      set({ script: { ...s, elements: next, extras: pruneExtras(s.extras, next), modifiedAt: Date.now() } })
       trackWords(next)
       schedulePages()
       scheduleSave()
@@ -137,9 +143,11 @@ export const useDoc = create<DocStore>((set, get) => {
     update: (f, opts) => {
       const s = get().script
       if (!s) return
-      const next = { ...f(s), modifiedAt: Date.now() }
+      const made = f(s)
+      const stamped = made.elements !== s.elements && !opts?.unstamped ? { ...made, elements: stampEdits(s.elements, made.elements, me()) } : made
+      const next = { ...stamped, modifiedAt: Date.now() }
       const changed = opts?.elementsChanged ?? next.elements !== s.elements
-      set({ script: next, externalRev: changed ? get().externalRev + 1 : get().externalRev, lastChangeRemote: !!opts?.remote })
+      set({ script: next, externalRev: changed ? get().externalRev + 1 : get().externalRev })
       if (changed) { lastWords = printedWords(next.elements) }
       schedulePages()
       scheduleSave()

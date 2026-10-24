@@ -6,6 +6,7 @@
 import { EditorState, Plugin, PluginKey, Selection, TextSelection, type Transaction, type Command } from 'prosemirror-state'
 import { Decoration, DecorationSet, type EditorView } from 'prosemirror-view'
 import type { Node as PMNode } from 'prosemirror-model'
+import type { Credit } from '../core/authors'
 import { ELEMENT_TYPES, newId, REVISION_COLORS, type Comment, type ElementType } from '../core/model'
 import { demote, detectOnEnter, detectWhileTyping, nextOnEnter, nextOnTab, onEnterWhenEmpty } from '../core/formatting'
 import { commentRange } from '../core/model'
@@ -254,8 +255,8 @@ export interface PageMeta {
   activeComment: string | null
   focusLine: boolean
   findQuery: string
-  /** Co-writers online, and the element each is on. */
-  peers?: { elementId: number | null; name: string; color: number }[]
+  /** Who last wrote each line, when the writer asked to see it. */
+  authors?: Map<number, Credit>
 }
 
 export const metaKey = new PluginKey<PageMeta | null>('pageMeta')
@@ -324,17 +325,11 @@ export const pageDecorations = new Plugin<PageMeta | null>({
         }
         const rev = n.attrs.revision as number
         if (rev > 0) { cls.push('is-revised'); attrs.style = `--rev:${REVISION_COLORS[rev]?.hex ?? '#888'}` }
-        const peer = meta?.peers?.find(p => p.elementId === n.attrs.id)
-        if (peer) {
-          cls.push('peer-here')
-          attrs.style = (attrs.style ? attrs.style + ';' : '') + `--peer:${hex(peer.color)}`
-          decos.push(Decoration.widget(pos + 1, () => {
-            const t = document.createElement('span')
-            t.className = 'peer-tag'
-            t.contentEditable = 'false'
-            t.textContent = peer.name
-            return t
-          }, { side: -1, key: `peer-${peer.name}-${peer.color}`, ignoreSelection: true }))
+        const by = meta?.authors?.get(n.attrs.id as number)
+        if (by) {
+          cls.push('by-author')
+          attrs.style = (attrs.style ? attrs.style + ';' : '') + `--by:${hex(by.color)}`
+          attrs.title = by.at ? `${by.name} · ${new Date(by.at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}` : by.name
         }
         // Scripts whose marks stack above and below the letters get the taller lines they print with.
         const h = n.content.size ? lineHeight(n.textContent) : 1

@@ -152,6 +152,7 @@ export function encodeScript(s: Script): J {
       if (e.color !== 0) o.c = e.color
       if (e.synopsis) o.s = e.synopsis
       if (e.orig != null) o.o = e.orig
+      if (e.by) { o.a = e.by; o.an = e.byName ?? ''; o.at = e.at }
       return o
     }),
   }
@@ -160,6 +161,7 @@ export function encodeScript(s: Script): J {
 export function decodeScript(o: J): Script {
   const els: Element[] = arr(o, 'elements').map((e, i) => el(num(e, 'i', i + 1), typeFromName(str(e, 't')), str(e, 'x'), {
     dual: bool(e, 'd'), revision: num(e, 'r'), color: num(e, 'c'), synopsis: str(e, 's'), orig: 'o' in e ? str(e, 'o') : null,
+    by: 'a' in e ? str(e, 'a') : null, byName: 'an' in e ? str(e, 'an') : null, at: num(e, 'at'),
   }))
   const title = str(o, 'title', 'Untitled')
   const id = str(o, 'id')

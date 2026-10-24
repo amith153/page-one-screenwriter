@@ -260,10 +260,5 @@
 }
 .sel-bubble button:hover { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 50%, transparent); }
 
-/* Collaborators' places in the script */
-.script-pm p.el.peer-here { box-shadow: inset 2px 0 0 var(--peer); }
-.peer-tag {
-  position: absolute; left: calc(var(--in) * -1.45); top: 0; max-width: calc(var(--in) * .9); padding: 0 5px; border-radius: 4px;
-  font: 600 9.5px/16px var(--font-ui); color: #fff; background: var(--peer); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  pointer-events: none; text-transform: none; font-style: normal;
-}
+/* Who wrote each line (Settings › Show who wrote what) */
+.script-pm p.el.by-author { box-shadow: inset 3px 0 0 var(--by); }

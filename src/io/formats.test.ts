@@ -1,11 +1,10 @@
-/** The new export formats, live-sync ordering and join codes. */
+/** The new export formats and author colours. */
 import { describe, expect, it } from 'vitest'
 import { unzipSync, strFromU8 } from 'fflate'
 import { el, newScript, titlePage } from '../core/model'
 import { defaultLayout, Paginator } from '../core/paginator'
-import { assignOrder, GAP } from '../core/ordering'
 import { writeFdx } from '../core/fdx'
-import { colorFor, findCode, pretty, PEER_COLORS } from '../collab/hub'
+import { AUTHOR_COLORS, colorFor } from '../core/authors'
 import { writeDocx, writeHtml, writePlainText, writeRtf, type FormatOptions } from './formats'
 
 const s = newScript({
@@ -76,31 +75,9 @@ describe('export formats', () => {
   })
 })
 
-describe('live-sync ordering (port of Ordering.kt)', () => {
-  it('numbers a fresh list by GAP', () => {
-    const m = assignOrder([10, 20, 30], new Map())
-    expect([m.get(10), m.get(20), m.get(30)]).toEqual([GAP, 2 * GAP, 3 * GAP])
-  })
-  it('keeps existing keys and only places inserts and moves', () => {
-    const existing = new Map([[1, 1024], [2, 2048], [3, 3072]])
-    const ins = assignOrder([1, 9, 2, 3], existing)
-    expect(ins.get(1)).toBe(1024); expect(ins.get(2)).toBe(2048); expect(ins.get(3)).toBe(3072)
-    expect(ins.get(9)).toBe(1536)
-    const moved = assignOrder([3, 1, 2], existing)
-    expect(moved.get(1)).toBe(1024); expect(moved.get(2)).toBe(2048)
-    expect(moved.get(3)!).toBeLessThan(1024)
-  })
-})
-
-describe('join codes (same as the phone)', () => {
-  it('finds a code in a message or link', () => {
-    expect(findCode('Join code: k7qp-x2ma')).toBe('K7QPX2MA')
-    expect(findCode('pageone://join/K7QPX2MA')).toBe('K7QPX2MA')
-    expect(findCode('no code here')).toBeNull()
-    expect(pretty('K7QPX2MA')).toBe('K7QP-X2MA')
-  })
+describe('author colours (same as the phone)', () => {
   it('gives a person the same colour as on the phone (Java hashCode)', () => {
     // "Amit".hashCode() == 2044535 in Java → index 2044535 % 7 == 3
-    expect(colorFor('Amit')).toBe(PEER_COLORS[3])
+    expect(colorFor('Amit')).toBe(AUTHOR_COLORS[3])
   })
 })

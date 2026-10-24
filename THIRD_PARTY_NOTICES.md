@@ -8,7 +8,7 @@ Page One is © 2026 Amith (amith153), released under the MIT License (see `LICEN
 - **Noto Sans** families for Arabic, Bengali, Devanagari, Gujarati, Gurmukhi, Hebrew, Kannada, Malayalam, Oriya, Sinhala, Tamil, Telugu and Thai (PDF export and non-Latin writing): SIL Open Font License 1.1, © Google (via Fontsource).
 
 ## Libraries
-- Tauri 2 (MIT or Apache-2.0), React and React DOM (MIT), Zustand (MIT), ProseMirror (MIT), pdf-lib and @pdf-lib/fontkit (MIT), fflate (MIT), Firebase JS SDK (Apache-2.0), regenerator-runtime (MIT).
+- Tauri 2 (MIT or Apache-2.0), React and React DOM (MIT), Zustand (MIT), ProseMirror (MIT), pdf-lib and @pdf-lib/fontkit (MIT), fflate (MIT), regenerator-runtime (MIT).
 - The Rust crates used by Tauri carry MIT and Apache-2.0 licenses; run `cargo license` in `src-tauri` for the full list.
 
 ## Data

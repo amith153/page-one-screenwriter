@@ -13,7 +13,7 @@ import { Logo } from './Logo'
 import { Modal, Switch, confirmAction, openMenu, toast, useModal } from './kit'
 import { useApp } from './appState'
 import { printNow } from './menus'
-import { JoinModal, ShareModal } from './Collab'
+import { ShareModal } from './Collab'
 import { DriveModal } from './Drive'
 import { SyncRows } from './SyncRows'
 
@@ -30,7 +30,6 @@ export function ModalHost() {
     {id === 'deadline' && <DeadlineModal />}
     {id === 'reports' && <ReportsRedirect />}
     {id === 'share' && <ShareModal />}
-    {id === 'join' && <JoinModal />}
     {id === 'drive' && <DriveModal />}
     {about && <AboutModal />}
   </>
@@ -81,6 +80,7 @@ function SettingsModal() {
         <Row label="Zoom"><input type="range" className="zoom-range" style={{ width: 200 }} min={0.7} max={1.6} step={0.05} value={s.zoom} onChange={e => set({ zoom: +e.target.value })} /><span className="faint tabular">{Math.round(s.zoom * 100)}%</span></Row>
         <Row label="Scene numbers" desc="In the margins, on screen and in the PDF."><Switch on={s.sceneNumbers} onChange={v => set({ sceneNumbers: v })} /></Row>
         <Row label="Bold scene headings" desc="On by default — in the editor, page view and every export."><Switch on={s.boldHeadings} onChange={v => set({ boldHeadings: v })} /></Row>
+        <Row label="Show who wrote what" desc="A coloured bar beside each line, by the writer who last changed it. Hover for the name."><Switch on={s.showAuthors} onChange={v => set({ showAuthors: v })} /></Row>
         <Row label="Bold character names" desc="The name above each speech, on screen and in every export."><Switch on={s.boldCharacters} onChange={v => set({ boldCharacters: v })} /></Row>
         <Row label="Automatic (CONT'D)" desc="When the same character speaks again after action."><Switch on={s.autoContd} onChange={v => set({ autoContd: v })} /></Row>
         <Row label="(MORE) / (CONT'D) across pages" desc="Split long speeches at page breaks."><Switch on={s.moreContd} onChange={v => set({ moreContd: v })} /></Row>

@@ -67,10 +67,14 @@ export interface Element {
   readonly synopsis: string
   /** The writer's own casing, kept while the text is shown in capitals. */
   readonly orig: string | null
+  /** Who last changed this line: an install's random author id, the name it wrote under, and when. */
+  readonly by: string | null
+  readonly byName: string | null
+  readonly at: number
 }
 
 export function el(id: number, type: ElementType, text: string, extra: Partial<Element> = {}): Element {
-  return { id, type, text, dual: false, revision: 0, color: 0, synopsis: '', orig: null, ...extra }
+  return { id, type, text, dual: false, revision: 0, color: 0, synopsis: '', orig: null, by: null, byName: null, at: 0, ...extra }
 }
 
 /** The text as the writer typed it (before any all-caps conversion). */

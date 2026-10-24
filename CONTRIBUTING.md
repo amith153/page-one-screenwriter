@@ -14,7 +14,7 @@ You need Node 20+ and stable Rust. See [README › For developers](README.md#17-
 
 ## Keys stay out of the repository
 
-Page One builds without any keys: it writes, exports and passes drafts. Live co-writing, Google Drive and film stills switch on only when a build has keys.
+Page One builds without any keys: it writes, exports and passes drafts. Google Drive and film stills switch on only when a build has keys.
 
 - Put your own keys in `.env.local` (copy `.env.example`). It is git-ignored.
 - Never commit `.env*` files, `client_secret*.json`, `google-services.json`, `collab.properties` or signing keys. `.gitignore` excludes them, and the pre-commit hook in `.githooks/` refuses key-shaped text.

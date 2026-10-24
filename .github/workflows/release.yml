@@ -39,5 +39,5 @@ jobs:
         with:
           tagName: ${{ inputs.tag }}
           releaseName: Page One ${{ inputs.tag }}
-          releaseBody: Keyless build (no live sync, Drive or film stills). See the README for what that means and how to build with your own keys.
+          releaseBody: Keyless build (no Drive or film stills). See the README for what that means and how to build with your own keys.
           releaseDraft: false
