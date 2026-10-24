@@ -6,6 +6,20 @@ Page One is a screenwriting app for Windows, macOS, Linux and Android. It writes
 
 This guide covers how to use every part of it. Developer notes are at the end.
 
+## Download
+
+| Platform | Get it |
+|---|---|
+| **Windows** (10 and 11) | [Releases](https://github.com/amith153/page-one/releases/latest): `PageOne-…-windows-x64-setup.exe` (installer) or the `.msi` |
+| **Android** (8.0 and newer) | [Page One for Android](https://github.com/amith153/page-one-android/releases/latest): `PageOne-…-android.apk`. Allow "install unknown apps" for your browser or file manager when asked |
+| **macOS, Linux** | Build from source (see For developers). A build workflow is included under `.github/workflows` |
+
+Windows may show "Windows protected your PC" because the installer is not code-signed yet: choose **More info, then Run anyway**. Android may warn the same way: choose **Install anyway**.
+
+The downloads contain **no server keys**, so they write, plan, export and print fully. Live co-writing, phone sync, Google Drive and daily film stills are off. To switch them on, build the app yourself with your own keys (see For developers and `.env.example`). Your scripts never leave your device unless you turn those features on.
+
+**License:** MIT, © 2026 Amith ([@amith153](https://github.com/amith153)). See `LICENSE` and `THIRD_PARTY_NOTICES.md`.
+
 ---
 
 ## Contents
