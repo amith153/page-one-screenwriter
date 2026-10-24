@@ -1,0 +1,118 @@
+/* Page One design tokens — the phone app's "studio" palette: layered ink surfaces in the dark,
+   warm ivory in the light, the accent used sparingly as light (glows, rings, edges). */
+
+@font-face { font-family: 'Courier Prime'; src: url('../assets/fonts/courier_prime.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: 'Courier Prime'; src: url('../assets/fonts/courier_prime_bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: block; }
+@font-face { font-family: 'Courier Prime'; src: url('../assets/fonts/courier_prime_italic.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: block; }
+@font-face { font-family: 'Courier Prime'; src: url('../assets/fonts/courier_prime_bold_italic.ttf') format('truetype'); font-weight: 700; font-style: italic; font-display: block; }
+
+:root {
+  --font-ui: 'Inter Variable', 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  /* Courier Prime for Latin; the bundled Noto faces ("Page One Script") for Indic, Thai, Arabic and
+     Hebrew; then each system's own CJK and Cyrillic faces. */
+  --font-script: 'Courier Prime', 'Page One Script', 'Cousine', 'Nirmala UI', 'Kohinoor Devanagari',
+    'Yu Gothic', 'Hiragino Sans', 'PingFang SC', 'Microsoft YaHei', 'Malgun Gothic', 'Apple SD Gothic Neo',
+    'Noto Sans CJK SC', 'Courier New', monospace;
+
+  --accent: #C8A96A;
+  --accent-2: #8EA6C8;
+  --on-accent: #16120C;
+
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  /* Apple's sheet curve: quick to start, long soft settle. */
+  --spring: cubic-bezier(.32, .72, 0, 1);
+  --t-fast: 120ms;
+  --t: 200ms;
+  --t-slow: 360ms;
+
+  --titlebar-h: 48px;
+  --statusbar-h: 30px;
+  --gap: 8px;
+  --pane-r: 14px;
+}
+
+/* ---- Studio dark (default) */
+:root, [data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0A0B0F;
+  --bg-glow: color-mix(in oklab, var(--accent) 7%, transparent);
+  --surface: #101218;
+  --surface-2: #151821;
+  --surface-3: #1B1F29;
+  --surface-4: #232733;
+  --line: rgba(255, 255, 255, .065);
+  --line-2: rgba(255, 255, 255, .1);
+  --line-3: rgba(255, 255, 255, .16);
+  --text: #EDEBF2;
+  --text-2: #A3A7B5;
+  --text-3: #6C7080;
+  --hover: rgba(255, 255, 255, .045);
+  --press: rgba(255, 255, 255, .08);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow: 0 8px 24px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .3);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, .55), 0 6px 18px rgba(0, 0, 0, .35);
+  --glass: rgba(16, 18, 24, .72);
+  /* Translucent panels over the ambient window background, with a lit top edge. */
+  --material: rgba(20, 22, 30, .62);
+  --material-edge: inset 0 1px 0 rgba(255, 255, 255, .05);
+  --pane-shadow: 0 12px 32px -20px rgba(0, 0, 0, .65);
+  --success: #45D19A;
+  --warning: #FFB547;
+  --danger: #FF6B6B;
+  --desk: #0C0D12;
+  --desk-grain: rgba(255, 255, 255, .012);
+}
+
+/* ---- Pure black (OLED) */
+[data-theme='black'] {
+  --bg: #000;
+  --surface: #07080A;
+  --surface-2: #0D0E12;
+  --surface-3: #13151A;
+  --surface-4: #1A1C22;
+  --line: rgba(255, 255, 255, .07);
+  --line-2: rgba(255, 255, 255, .1);
+  --line-3: rgba(255, 255, 255, .15);
+  --glass: rgba(0, 0, 0, .75);
+  --material: rgba(10, 11, 14, .7);
+  --desk: #000;
+}
+
+/* ---- Warm ivory light */
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #F7F4EE;
+  --bg-glow: color-mix(in oklab, var(--accent) 10%, transparent);
+  --surface: #FCFAF6;
+  --surface-2: #F3EFE8;
+  --surface-3: #EDE9E1;
+  --surface-4: #E7E2D9;
+  --line: rgba(70, 50, 20, .09);
+  --line-2: rgba(70, 50, 20, .14);
+  --line-3: rgba(70, 50, 20, .22);
+  --text: #1B1A18;
+  --text-2: #67615A;
+  --text-3: #9A968F;
+  --hover: rgba(40, 30, 10, .045);
+  --press: rgba(40, 30, 10, .085);
+  --shadow-sm: 0 1px 2px rgba(60, 45, 20, .08);
+  --shadow: 0 8px 24px rgba(60, 45, 20, .10), 0 2px 6px rgba(60, 45, 20, .06);
+  --shadow-lg: 0 24px 64px rgba(60, 45, 20, .16), 0 6px 18px rgba(60, 45, 20, .08);
+  --glass: rgba(252, 250, 246, .78);
+  --material: rgba(255, 253, 249, .66);
+  --material-edge: inset 0 1px 0 rgba(255, 255, 255, .8);
+  --pane-shadow: 0 12px 32px -20px rgba(60, 45, 20, .22);
+  --success: #1E9E66;
+  --warning: #C77A00;
+  --danger: #D64545;
+  --desk: #E7E3DC;
+  --desk-grain: rgba(0, 0, 0, .015);
+}

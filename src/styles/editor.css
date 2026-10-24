@@ -1,0 +1,269 @@
+/* The page. Geometry is the industry standard and matches the paginator exactly:
+   12 pt Courier = 10 characters per inch, 6 lines per inch, 1.5" left and 1" right margins. */
+
+.desk {
+  --in: calc(96px * var(--zoom, 1));
+  --line: calc(var(--in) / 6);
+  --col: calc(var(--in) / 10);
+  position: relative;
+  height: 100%;
+  overflow: auto;
+  background:
+    radial-gradient(1200px 500px at 50% -120px, var(--bg-glow), transparent 70%),
+    var(--desk);
+  scroll-behavior: auto;
+  scroll-padding: 120px;
+}
+
+.paper {
+  --paper: #FFFFFF;
+  --ink: #151515;
+  --faint: #A29E97;
+  --gutter: #B1ACA4;
+  --note-bg: #FFF4C2;
+  --note-ink: #5A4A12;
+  --edge: rgba(0, 0, 0, .14);
+  position: relative;
+  width: calc(var(--in) * 8.5);
+  min-height: calc(var(--in) * 11);
+  margin: 36px auto 30vh;
+  padding: var(--in) var(--in) calc(var(--in) * 1) calc(var(--in) * 1.5);
+  box-sizing: border-box;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 3px;
+  /* A sheet resting on the desk: a hairline edge, a tight contact shadow and a long soft one. */
+  box-shadow: 0 0 0 .5px var(--edge), 0 1px 1px rgba(0, 0, 0, .1), 0 6px 12px -4px rgba(0, 0, 0, .18), 0 40px 80px -24px rgba(0, 0, 0, .55);
+  transition: box-shadow var(--t-slow) var(--ease), background var(--t-slow) var(--ease);
+}
+[data-theme='light'] .paper { box-shadow: 0 0 0 1px rgba(80, 60, 30, .08), 0 2px 4px rgba(80, 60, 30, .06), 0 30px 60px -20px rgba(80, 60, 30, .22); }
+
+.paper-sepia { --paper: #F5EDDA; --ink: #3A2E22; --faint: #9C8D78; --gutter: #A89878; --note-bg: #FFE9A8; }
+.paper-theme { --paper: var(--surface-2); --ink: #ECE9E2; --faint: #6C7080; --gutter: #5C6070; --note-bg: #3A3420; --note-ink: #F0DD9A; --edge: rgba(255, 255, 255, .06); }
+[data-theme='light'] .paper-theme { --paper: #FFFDF8; --ink: #1B1A18; --faint: #A29E97; --edge: rgba(0, 0, 0, .1); --note-bg: #FFF4C2; --note-ink: #5A4A12; }
+[data-theme='black'] .paper-theme { --paper: #0B0B0D; }
+
+.script-host { position: relative; }
+
+.script-pm {
+  outline: none;
+  font-family: var(--font-script);
+  font-size: var(--line);
+  line-height: var(--line);
+  font-variant-ligatures: none;
+  font-kerning: none;
+  caret-color: var(--accent);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  min-height: calc(var(--in) * 9);
+}
+.script-pm ::selection { background: color-mix(in oklab, var(--accent) 38%, transparent); }
+
+.script-pm p.el {
+  position: relative;
+  margin: var(--line) 0 0 0;
+  width: calc(var(--col) * 60);
+  min-height: var(--line);
+}
+.script-pm > p.el:first-child { margin-top: 0; }
+/* Kannada, Devanagari, Thai…: marks above and below the letters need a taller line, as the page prints them. */
+.script-pm p.el.is-tall { line-height: calc(var(--line) * var(--lh, 1.5)); }
+
+.script-pm p.el-scene_heading { text-transform: uppercase; margin-top: calc(var(--line) * (1 + var(--scene-space, 1) - 1)); font-weight: var(--heading-weight, 700); }
+.script-pm p.el-action { }
+.script-pm p.el-character { text-transform: uppercase; font-weight: var(--character-weight, 400); margin-left: calc(var(--col) * 22); width: calc(var(--col) * 38); }
+.script-pm p.el-parenthetical { margin-top: 0; margin-left: calc(var(--col) * 16); width: calc(var(--col) * 25); }
+.script-pm p.el-dialogue { margin-top: 0; margin-left: calc(var(--col) * 10); width: calc(var(--col) * 35); }
+.script-pm p.el-lyrics { margin-top: 0; margin-left: calc(var(--col) * 10); width: calc(var(--col) * 35); font-style: italic; }
+.script-pm p.el-transition { text-transform: uppercase; text-align: end; }
+.script-pm p.el-shot { text-transform: uppercase; }
+.script-pm p.el-centered { text-align: center; }
+
+/* Right-to-left lines mirror their indents inside the 60-column text area (the paper keeps its binding edge). */
+.script-pm p.el-character:dir(rtl) { margin-left: 0; }
+.script-pm p.el-parenthetical:dir(rtl) { margin-left: calc(var(--col) * 19); }
+.script-pm p.el-dialogue:dir(rtl), .script-pm p.el-lyrics:dir(rtl) { margin-left: calc(var(--col) * 15); }
+.script-pm p.el-transition.is-empty:dir(rtl)::before { text-align: left; }
+.script-pm p.el-note {
+  font-family: var(--font-ui);
+  font-size: calc(var(--line) * .82);
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--note-ink);
+  background: var(--note-bg);
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-left: -8px;
+  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--note-ink) 45%, transparent);
+}
+
+/* Dual dialogue: the right-hand speech is shown indented on screen; the page view prints true columns. */
+.script-pm .is-dual { box-shadow: inset 2px 0 0 color-mix(in oklab, var(--accent) 70%, transparent); }
+.script-pm .is-dual::after { content: 'DUAL'; position: absolute; right: calc(var(--col) * -9); top: 0; font: 600 9px/var(--line) var(--font-ui); letter-spacing: .08em; color: var(--accent); }
+
+/* Placeholders on empty lines */
+.script-pm .is-empty::before {
+  content: attr(data-ph);
+  position: absolute;
+  left: 0;
+  right: 0;
+  color: var(--faint);
+  opacity: .55;
+  pointer-events: none;
+  text-transform: none;
+}
+.script-pm p.el-transition.is-empty::before { text-align: right; }
+.script-pm p.el-centered.is-empty::before { text-align: center; }
+.script-pm .is-empty:not(.is-current)::before { opacity: 0; }
+
+/* Scene numbers in both margins, automatic (CONT'D) */
+.scene-no {
+  position: absolute;
+  left: calc(var(--in) * -0.9);
+  top: 0;
+  color: var(--ink);
+  user-select: none;
+  pointer-events: none;
+}
+.scene-no.right { left: auto; right: calc(var(--in) * -0.75); }
+.contd { color: var(--ink); opacity: .55; user-select: none; text-transform: uppercase; }
+
+/* Revision asterisks in the right margin */
+.script-pm .is-revised::after {
+  content: '*';
+  position: absolute;
+  top: 0;
+  right: auto;
+  left: calc(var(--col) * 61.5);
+  color: var(--rev);
+  font-weight: 700;
+  -webkit-text-stroke: .4px color-mix(in oklab, var(--ink) 40%, transparent);
+}
+.script-pm p.el-character.is-revised::after { left: calc(var(--col) * 39.5); }
+.script-pm p.el-dialogue.is-revised::after, .script-pm p.el-lyrics.is-revised::after { left: calc(var(--col) * 51.5); }
+.script-pm p.el-parenthetical.is-revised::after { left: calc(var(--col) * 45.5); }
+
+/* Page breaks: the desk shows between sheets, with the next page's number where it prints. */
+.page-break {
+  position: relative;
+  margin: calc(var(--in) * .9) calc(var(--in) * -1) 0 calc(var(--in) * -1.5);
+  height: calc(var(--in) * 1);
+  user-select: none;
+  pointer-events: none;
+}
+.page-break .pb-gap {
+  position: absolute;
+  left: -1px; right: -1px;
+  top: 0;
+  height: 22px;
+  background: var(--desk);
+  box-shadow: inset 0 7px 9px -8px rgba(0, 0, 0, .35), inset 0 -7px 9px -8px rgba(0, 0, 0, .35);
+}
+.page-break .pb-num {
+  position: absolute;
+  right: calc(var(--in) * 1);
+  top: calc(22px + var(--in) * .5 - var(--line));
+  font-family: var(--font-script);
+  color: var(--ink);
+}
+.page-break + p.el { margin-top: 0 !important; }
+
+/* Focus mode: everything but the current line fades back. */
+.focus-line .script-pm p.el { transition: opacity var(--t-slow) var(--ease); }
+.focus-line .script-pm p.el:not(.is-current) { opacity: .22; }
+.focus-line .script-pm:not(:focus-within) p.el { opacity: 1; }
+
+/* Notes pinned to text */
+.note-mark {
+  background: color-mix(in oklab, var(--note) 26%, transparent);
+  box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--note) 80%, transparent);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.note-mark.is-active { background: color-mix(in oklab, var(--note) 48%, transparent); }
+.find-hit { background: rgba(255, 213, 79, .55); border-radius: 2px; box-shadow: 0 0 0 1px rgba(200, 150, 0, .4); }
+
+/* Track changes on the page: added words underlined in green, cut words struck in red, cut lines greyed in place. */
+.script-pm .chg-ins { background: rgba(46, 160, 90, .16); box-shadow: inset 0 -2px 0 rgba(46, 160, 90, .7); border-radius: 2px; }
+.script-pm .chg-added { box-shadow: inset 3px 0 0 rgba(46, 160, 90, .75); background: rgba(46, 160, 90, .06); }
+.script-pm .chg-retyped { box-shadow: inset 3px 0 0 rgba(90, 120, 200, .7); }
+.script-pm .chg-del { color: #C0392B; text-decoration: line-through; text-decoration-thickness: 1.5px; opacity: .75; user-select: none; }
+.script-pm .chg-removed { color: #C0392B; opacity: .55; text-decoration: line-through; user-select: none; position: relative; }
+.script-pm .chg-removed::before { content: 'CUT'; position: absolute; left: calc(var(--col) * -7); font: 600 9px/var(--line) var(--font-ui); letter-spacing: .08em; text-decoration: none; }
+
+/* Autocomplete: the rest of the chosen suggestion, faint after the caret (Tab or → takes it). */
+.script-pm .ghost { color: var(--faint); opacity: .8; pointer-events: none; user-select: none; }
+
+/* Autocomplete */
+.suggest {
+  position: absolute;
+  z-index: 30;
+  min-width: 220px;
+  max-width: 360px;
+  padding: 5px;
+  background: var(--glass);
+  backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-lg);
+  animation: pop var(--t) var(--ease-out);
+}
+.suggest button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 9px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: 500 12.5px/1.3 var(--font-script);
+  text-align: left;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.suggest button em { font: 500 10.5px var(--font-ui); font-style: normal; color: var(--accent); letter-spacing: .02em; }
+.suggest button.is-on { background: color-mix(in oklab, var(--accent) 18%, transparent); }
+.suggest-foot { padding: 5px 9px 2px; font-size: 10.5px; color: var(--text-3); border-top: 1px solid var(--line); margin-top: 4px; }
+
+/* Find bar */
+.findbar {
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  margin: 12px auto -48px;
+  padding: 5px 6px 5px 12px;
+  background: var(--glass);
+  backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  color: var(--text-2);
+  animation: pop var(--t) var(--ease-out);
+}
+.findbar input { width: 170px; height: 28px; border: 0; background: var(--surface-3); color: var(--text); border-radius: 7px; padding: 0 9px; font: inherit; font-size: 12.5px; outline: none; }
+.findbar input:focus { box-shadow: 0 0 0 1.5px color-mix(in oklab, var(--accent) 70%, transparent); }
+.findbar-count { min-width: 66px; font-size: 11.5px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.findbar-sep { width: 1px; height: 20px; background: var(--line-2); margin: 0 4px; }
+
+/* "Add note" over a selection */
+.sel-bubble { position: absolute; z-index: 31; transform: translate(-50%, -100%); animation: pop var(--t) var(--ease-out); }
+.sel-bubble button {
+  display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border-radius: 999px;
+  font: 600 12px/1 var(--font-ui); color: var(--text); background: var(--glass); backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid var(--line-2); box-shadow: var(--shadow-lg); cursor: pointer;
+}
+.sel-bubble button:hover { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 50%, transparent); }
+
+/* Collaborators' places in the script */
+.script-pm p.el.peer-here { box-shadow: inset 2px 0 0 var(--peer); }
+.peer-tag {
+  position: absolute; left: calc(var(--in) * -1.45); top: 0; max-width: calc(var(--in) * .9); padding: 0 5px; border-radius: 4px;
+  font: 600 9.5px/16px var(--font-ui); color: #fff; background: var(--peer); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  pointer-events: none; text-transform: none; font-style: normal;
+}

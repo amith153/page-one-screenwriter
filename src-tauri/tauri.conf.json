@@ -1,0 +1,53 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Page One",
+  "version": "0.1.1",
+  "identifier": "com.amit.pageone",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Page One",
+        "width": 1440,
+        "height": 920,
+        "minWidth": 960,
+        "minHeight": 640,
+        "center": true,
+        "resizable": true,
+        "dragDropEnabled": false,
+        "decorations": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "backgroundColor": "#0A0B0F"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Productivity",
+    "shortDescription": "Write screenplays. Plan the story. Keep writing.",
+    "longDescription": "Page One is a screenwriting app: industry-format screenplays, index cards, story structure, Script Doctor, production tools and writing goals.",
+    "fileAssociations": [
+      { "ext": ["pageone"], "name": "Page One script", "role": "Editor" },
+      { "ext": ["fountain"], "name": "Fountain screenplay", "role": "Editor" },
+      { "ext": ["fdx"], "name": "Final Draft screenplay", "role": "Editor" }
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

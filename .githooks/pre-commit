@@ -1,0 +1,22 @@
+#!/bin/sh
+# Refuse commits that carry keys or OAuth secrets. Turn on with: git config core.hooksPath .githooks
+
+fail=0
+
+# Files that should never be committed, whatever they contain.
+for f in $(git diff --cached --name-only --diff-filter=ACMR); do
+  case "$f" in
+    .env.example) ;;
+    .env|.env.*|*client_secret*|*google-services.json|*GoogleService-Info.plist|*collab.properties|*.keystore|*.jks|*.pem|*.p12|*.pfx)
+      echo "pre-commit: refusing to commit $f (secrets file)"; fail=1 ;;
+  esac
+done
+
+# Key-shaped text in what is being added.
+if git diff --cached -U0 --diff-filter=ACMR -- . ':(exclude).githooks/*' | grep -E '^\+' |
+  grep -nE 'AIza[0-9A-Za-z_-]{30,}|GOCSPX-[0-9A-Za-z_-]{10,}|[0-9]+-[0-9a-z]{20,}\.apps\.googleusercontent\.com|-----BEGIN [A-Z ]*PRIVATE KEY-----|"private_key"|VITE_[A-Z_]+=[A-Za-z0-9:._-]{8,}'; then
+  echo "pre-commit: the lines above look like keys. Keep them in .env.local (git-ignored)."
+  fail=1
+fi
+
+exit $fail
