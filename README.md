@@ -8,13 +8,14 @@ This guide covers how to use every part of it. Developer notes are at the end.
 
 ## Download
 
-| Platform | Get it |
-|---|---|
-| **Windows** (10 and 11) | [Releases](https://github.com/amith153/page-one-screenwriter/releases/latest): `PageOne-…-windows-x64-setup.exe` (installer) or the `.msi` |
-| **Android** (8.0 and newer) | [Page One for Android](https://github.com/amith153/page-one-screenwriter-android/releases/latest): `PageOne-…-android.apk`. Allow "install unknown apps" for your browser or file manager when asked |
-| **macOS, Linux** | Build from source (see For developers). A build workflow is included under `.github/workflows` |
+Get the file for your system from the [latest release](https://github.com/amith153/page-one-screenwriter/releases/latest).
 
-Windows may show "Windows protected your PC" because the installer is not code-signed yet: choose **More info, then Run anyway**. Android may warn the same way: choose **Install anyway**.
+- **Windows** (10 and 11): the `.exe` is the normal installer, and the `.msi` is the same app for office or managed PCs.
+- **macOS**: the `.dmg` is for Apple Silicon Macs (M1 and later). The `.app.tar.gz` is the same app in an archive and can be ignored.
+- **Linux**: the `.deb` is for Ubuntu, Debian and Mint, and the `.rpm` is for Fedora and openSUSE. The `.AppImage` works on any distribution without installing.
+- **Android** (8.0 and newer): [Page One for Android](https://github.com/amith153/page-one-screenwriter-android/releases/latest), the `.apk`. Allow "install unknown apps" for your browser or file manager when asked.
+
+Windows may show "Windows protected your PC" because the installer is not code-signed yet: choose **More info, then Run anyway**. On a Mac, right-click the app and choose **Open** the first time. Android may warn the same way: choose **Install anyway**.
 
 The downloads contain **no server keys**. Writing, planning, exporting, printing and **Wi-Fi sync with the phone app** all work. Google Drive and daily film stills need keys of your own: build the app yourself (see For developers and `.env.example`). Your scripts never leave your devices.
 
