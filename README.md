@@ -311,7 +311,7 @@ Server addresses and API keys are not settings: they are built into the app (see
 
 ## 14. Keyboard shortcuts
 
-Press **Ctrl+/** in the app for this list. On a Mac, use Cmd for Ctrl.
+Press **Ctrl+/** in the app for this list.
 
 | Keys | Action |
 |---|---|
