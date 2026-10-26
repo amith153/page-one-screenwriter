@@ -2,7 +2,7 @@
 
 **Write screenplays. Plan the story. Keep writing.**
 
-Page One is a screenwriting app for Windows, macOS, Linux and Android. It writes industry-format screenplays, helps you plan the story, handles the production side (revisions, locked pages, reports, sides) and keeps you writing with goals, sprints and deadlines. The desktop app and the phone app open the same files and can edit the same script live.
+Page One is a screenwriting app for Windows and Android. It writes industry-format screenplays, helps you plan the story, handles the production side (revisions, locked pages, reports, sides) and keeps you writing with goals, sprints and deadlines. The desktop app and the phone app open the same files and can edit the same script live.
 
 This guide covers how to use every part of it. Developer notes are at the end.
 
@@ -11,11 +11,9 @@ This guide covers how to use every part of it. Developer notes are at the end.
 Get the file for your system from the [latest release](https://github.com/amith153/page-one-screenwriter/releases/latest).
 
 - **Windows** (10 and 11): the `.exe` is the normal installer, and the `.msi` is the same app for office or managed PCs.
-- **macOS**: the `.dmg` is for Apple Silicon Macs (M1 and later). The `.app.tar.gz` is the same app in an archive and can be ignored.
-- **Linux**: the `.deb` is for Ubuntu, Debian and Mint, and the `.rpm` is for Fedora and openSUSE. The `.AppImage` works on any distribution without installing.
 - **Android** (8.0 and newer): [Page One for Android](https://github.com/amith153/page-one-screenwriter-android/releases/latest), the `.apk`. Allow "install unknown apps" for your browser or file manager when asked.
 
-Windows may show "Windows protected your PC" because the installer is not code-signed yet: choose **More info, then Run anyway**. On a Mac, right-click the app and choose **Open** the first time. Android may warn the same way: choose **Install anyway**.
+Windows may show "Windows protected your PC" because the installer is not code-signed yet: choose **More info, then Run anyway**. Android may warn the same way: choose **Install anyway**.
 
 The downloads contain **no server keys**. Writing, planning, exporting, printing and **Wi-Fi sync with the phone app** all work. Google Drive and daily film stills need keys of your own: build the app yourself (see For developers and `.env.example`). Your scripts never leave your devices.
 

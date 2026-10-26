@@ -1,6 +1,6 @@
 name: Release builds
 
-# Builds keyless installers (no server keys, no secrets) for Windows, macOS and Linux.
+# Builds keyless installers (no server keys, no secrets) for Windows.
 # Run it by hand from the Actions tab and give it a tag name such as v0.1.2; it attaches the installers to that release.
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-22.04]
+        os: [windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -26,11 +26,6 @@ jobs:
           node-version: 22
           cache: npm
       - uses: dtolnay/rust-toolchain@stable
-      - name: Linux packages
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - run: npm ci
       - run: npm test
       - uses: tauri-apps/tauri-action@v0

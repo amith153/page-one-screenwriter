@@ -33,7 +33,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis", "msi"],
     "category": "Productivity",
     "shortDescription": "Write screenplays. Plan the story. Keep writing.",
     "longDescription": "Page One is a screenwriting app: industry-format screenplays, index cards, story structure, Script Doctor, production tools and writing goals.",
@@ -46,7 +46,6 @@
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
-      "icons/icon.icns",
       "icons/icon.ico"
     ]
   }
